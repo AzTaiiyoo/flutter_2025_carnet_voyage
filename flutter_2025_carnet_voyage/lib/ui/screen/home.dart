@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../routes/routes.dart';
 import '../view/list.dart';
 
 class Home extends StatefulWidget {
@@ -27,13 +28,7 @@ class _HomeState extends State<Home> {
               icon: const Icon(Icons.add),
               tooltip: 'Ajouter une sortie',
               onPressed: () {
-                // TODO: Navigation vers la page d'ajout de sortie
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Fonctionnalité à implémenter'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
+                Navigator.pushNamed(context, Routes.addActivity);
               },
             ),
         ],
