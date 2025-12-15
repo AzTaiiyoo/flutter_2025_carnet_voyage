@@ -16,12 +16,11 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Home Screen')),
       body: _views[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Menu'),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Carte'),
         ],
         currentIndex: _selectedIndex,
         onTap: (index) {
