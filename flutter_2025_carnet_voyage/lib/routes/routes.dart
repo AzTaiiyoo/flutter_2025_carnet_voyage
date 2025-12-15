@@ -1,8 +1,7 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_2025_carnet_voyage/ui/screen/map.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_2025_carnet_voyage/ui/screen/home.dart';
+import 'package:flutter_2025_carnet_voyage/ui/screen/map_screen.dart';
 import 'package:flutter_2025_carnet_voyage/ui/screen/add_activity.dart';
-
-import '../ui/screen/home.dart';
 
 class Routes {
   static const String home = '/home';
