@@ -9,7 +9,9 @@ import 'package:flutter_2025_carnet_voyage/ui/widget/address_search_bar.dart';
 import 'package:flutter_2025_carnet_voyage/ui/widget/address_info_widget.dart';
 
 class MapView extends StatefulWidget {
-  const MapView({super.key});
+  final VoidCallback? onNavigateToAddActivity;
+  
+  const MapView({super.key, this.onNavigateToAddActivity});
 
   @override
   State<MapView> createState() => _MapViewState();
@@ -75,23 +77,27 @@ class _MapViewState extends State<MapView> {
 
               // Contenu superposé
               SafeArea(
-                child: Column(
-                  children: [
-                    // Barre de recherche en haut
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: const AddressSearchBar(),
-                    ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Barre de recherche en haut
+                      const AddressSearchBar(),
 
-                    // Widget d'informations météo/localisation
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: const AddressInfoWidget(),
-                    ),
+                      const SizedBox(height: 8),
 
-                    // Spacer pour pousser le bouton vers le bas
-                    const Spacer(),
-                  ],
+                      // Widget d'informations météo/localisation (avec hauteur max)
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(context).size.height * 0.35,
+                        ),
+                        child: const SingleChildScrollView(
+                          child: AddressInfoWidget(),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
@@ -128,18 +134,9 @@ class _MapViewState extends State<MapView> {
   }
 
   void _onValidateSelection(BuildContext context, MapState state) {
-    // TODO: Naviguer vers l'écran de création de sortie avec l'adresse
-    if (state.selectedAddress != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Adresse sélectionnée: ${state.selectedAddress}'),
-          duration: const Duration(seconds: 2),
-          action: SnackBarAction(label: 'OK', onPressed: () {}),
-        ),
-      );
-
-      // TODO: Remplacer par la navigation vers l'écran de création
-      // Navigator.pushNamed(context, Routes.createActivity, arguments: state.selectedAddress);
+    if (state.selectedAddress != null && widget.onNavigateToAddActivity != null) {
+      // Naviguer vers AddActivity via callback
+      widget.onNavigateToAddActivity!();
     }
   }
 }

@@ -22,11 +22,7 @@ class _SortieListPageState extends State<SortieListPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.travel_explore,
-                  size: 80,
-                  color: Colors.grey[300],
-                ),
+                Icon(Icons.travel_explore, size: 80, color: Colors.grey[300]),
                 const SizedBox(height: 16),
                 Text(
                   'Aucune sortie enregistrée',
@@ -39,10 +35,7 @@ class _SortieListPageState extends State<SortieListPage> {
                 const SizedBox(height: 8),
                 Text(
                   'Appuyez sur + pour ajouter une sortie',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[500],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                 ),
               ],
             ),

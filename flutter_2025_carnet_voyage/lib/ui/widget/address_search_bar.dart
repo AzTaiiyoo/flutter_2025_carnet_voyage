@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_2025_carnet_voyage/blocs/map_cubit.dart';
@@ -15,6 +17,7 @@ class _AddressSearchBarState extends State<AddressSearchBar> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool _showSuggestions = false;
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -28,13 +31,22 @@ class _AddressSearchBarState extends State<AddressSearchBar> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
   }
 
   void _onSearchChanged(String query) {
-    context.read<MapCubit>().searchAddresses(query);
+    // Annuler le timer précédent
+    _debounceTimer?.cancel();
+
+    // Attendre 500ms avant de lancer la recherche
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      if (query.length >= 3) {
+        context.read<MapCubit>().searchAddresses(query);
+      }
+    });
   }
 
   void _onAddressSelected(Address address) {

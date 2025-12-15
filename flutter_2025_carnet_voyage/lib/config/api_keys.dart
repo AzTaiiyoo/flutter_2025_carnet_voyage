@@ -3,6 +3,7 @@
 /// IMPORTANT: Ne pas commiter ce fichier avec de vraies clés API !
 /// Remplacez 'YOUR_API_KEY_HERE' par votre vraie clé OpenWeatherMap
 /// Obtenez votre clé gratuite sur: https://openweathermap.org/api
+library;
 
 class ApiKeys {
   /// Clé API OpenWeatherMap

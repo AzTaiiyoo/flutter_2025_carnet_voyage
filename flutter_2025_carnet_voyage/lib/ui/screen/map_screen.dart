@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_2025_carnet_voyage/ui/view/map_view.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -10,6 +11,6 @@ class MapScreen extends StatefulWidget {
 class _MapState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return MapView();
   }
 }
