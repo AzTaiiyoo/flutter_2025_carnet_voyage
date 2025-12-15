@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_2025_carnet_voyage/ui/view/home_view.dart';
 import 'package:flutter_2025_carnet_voyage/ui/view/map_view.dart';
+import '../view/list.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -10,27 +11,74 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  int _selectedIndex = 0;
+  int currentPageIndex = 0;
 
-  final List<Widget> _views = const [HomeView(), MapView()];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _views[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Menu'),
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Carte'),
+      appBar: AppBar(
+        title: Text(
+          currentPageIndex == 0 ? 'Mes Sorties' : 'Carte',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        elevation: 0,
+        actions: [
+          if (currentPageIndex == 0)
+            IconButton(
+              icon: const Icon(Icons.add),
+              tooltip: 'Ajouter une sortie',
+              onPressed: () {
+                // TODO: Navigation vers la page d'ajout de sortie
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Fonctionnalité à implémenter'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+            ),
         ],
-        currentIndex: _selectedIndex,
-        onTap: (index) {
+      ),
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: (int index) {
           setState(() {
-            _selectedIndex = index;
+            currentPageIndex = index;
           });
         },
-        backgroundColor: Colors.deepPurpleAccent,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.black,
+        indicatorColor: Theme.of(context).colorScheme.primaryContainer,
+        selectedIndex: currentPageIndex,
+        destinations: const <Widget>[
+          NavigationDestination(
+            selectedIcon: Icon(Icons.list),
+            icon: Icon(Icons.list_outlined),
+            label: 'Liste',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.map),
+            icon: Icon(Icons.map_outlined),
+            label: 'Carte',
+          ),
+        ],
+      ),
+      body: IndexedStack(
+        index: currentPageIndex,
+        children: <Widget>[
+          const SortieListPage(),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.map, size: 64, color: Colors.grey[400]),
+                const SizedBox(height: 16),
+                Text(
+                  'Carte à implémenter',
+                  style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
