@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_2025_carnet_voyage/routes/routes.dart';
+import 'package:flutter_2025_carnet_voyage/blocs/sortie_cubit.dart';
+import 'package:flutter_2025_carnet_voyage/blocs/map_cubit.dart';
+import 'package:flutter_2025_carnet_voyage/repositories/geo_coding_repository.dart';
+import 'package:flutter_2025_carnet_voyage/repositories/weather_repository.dart';
 
 void main() {
   // Démarrage de l'application
@@ -11,28 +16,40 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+    // Création des repositories (peuvent être partagés)
+    const GeoCodingRepository geoCodingRepository = GeoCodingRepository();
+    const WeatherRepository weatherRepository = WeatherRepository();
+
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<GeoCodingRepository>.value(
+          value: geoCodingRepository,
+        ),
+        RepositoryProvider<WeatherRepository>.value(value: weatherRepository),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          // Cubit pour les sorties (liste)
+          BlocProvider<SortieCubit>(create: (context) => SortieCubit()),
+          // Cubit pour la carte
+          BlocProvider<MapCubit>(
+            create: (context) => MapCubit(
+              geoCodingRepository: geoCodingRepository,
+              weatherRepository: weatherRepository,
+            ),
+          ),
+        ],
+        child: MaterialApp(
+          title: 'Carnet de Voyage',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+            useMaterial3: true,
+          ),
+          routes: Routes.allRoutes,
+          initialRoute: Routes.home,
+        ),
       ),
-      routes: Routes.allRoutes,
-      initialRoute: Routes.home,
     );
   }
 }

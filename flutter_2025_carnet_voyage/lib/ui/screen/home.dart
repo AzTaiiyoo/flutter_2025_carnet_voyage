@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_2025_carnet_voyage/ui/view/home_view.dart';
 import 'package:flutter_2025_carnet_voyage/ui/view/map_view.dart';
 import '../view/list.dart';
 
@@ -63,22 +62,7 @@ class _HomeState extends State<Home> {
       ),
       body: IndexedStack(
         index: currentPageIndex,
-        children: <Widget>[
-          const SortieListPage(),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.map, size: 64, color: Colors.grey[400]),
-                const SizedBox(height: 16),
-                Text(
-                  'Carte à implémenter',
-                  style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                ),
-              ],
-            ),
-          ),
-        ],
+        children: const <Widget>[SortieListPage(), MapView()],
       ),
     );
   }
