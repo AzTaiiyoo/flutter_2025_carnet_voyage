@@ -16,7 +16,8 @@ class SortieCubit extends Cubit<List<Sortie>> {
           postcode: '75007',
         ),
         date: DateTime(2024, 12, 10),
-        note: 'Magnifique vue sur Paris ! Un incontournable de la capitale française.',
+        note:
+            'Magnifique vue sur Paris ! Un incontournable de la capitale française.',
         rating: 5.0,
         imageUrl: null,
       ),
@@ -29,7 +30,8 @@ class SortieCubit extends Cubit<List<Sortie>> {
           postcode: '50170',
         ),
         date: DateTime(2024, 11, 15),
-        note: 'Architecture médiévale impressionnante. Les marées sont spectaculaires.',
+        note:
+            'Architecture médiévale impressionnante. Les marées sont spectaculaires.',
         rating: 4.8,
         imageUrl: null,
       ),
@@ -42,7 +44,8 @@ class SortieCubit extends Cubit<List<Sortie>> {
           postcode: '78000',
         ),
         date: DateTime(2024, 10, 20),
-        note: 'Le château et ses jardins sont somptueux. Prévoir une journée complète.',
+        note:
+            'Le château et ses jardins sont somptueux. Prévoir une journée complète.',
         rating: 4.9,
         imageUrl: null,
       ),
@@ -55,7 +58,8 @@ class SortieCubit extends Cubit<List<Sortie>> {
           postcode: '13260',
         ),
         date: DateTime(2024, 9, 5),
-        note: 'Eau turquoise et falaises magnifiques. Parfait pour la randonnée.',
+        note:
+            'Eau turquoise et falaises magnifiques. Parfait pour la randonnée.',
         rating: 4.7,
         imageUrl: null,
       ),
@@ -80,7 +84,9 @@ class SortieCubit extends Cubit<List<Sortie>> {
   }
 
   void updateSortie(String id, Sortie updatedSortie) {
-    emit(state.map((sortie) => sortie.id == id ? updatedSortie : sortie).toList());
+    emit(
+      state.map((sortie) => sortie.id == id ? updatedSortie : sortie).toList(),
+    );
   }
 
   void deleteSortie(String id) {
