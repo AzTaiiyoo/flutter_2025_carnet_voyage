@@ -8,7 +8,9 @@ import '../widget/sortie_card.dart';
 
 /// Page de liste des sorties avec design Life-log premium
 class SortieListPage extends StatefulWidget {
-  const SortieListPage({super.key});
+  final void Function(Sortie)? onEditSortie;
+
+  const SortieListPage({super.key, this.onEditSortie});
 
   @override
   State<SortieListPage> createState() => _SortieListPageState();
@@ -60,13 +62,12 @@ class _SortieListPageState extends State<SortieListPage> {
             return SortieCard(
               sortie: sortie,
               onTap: () {
-                // TODO: Navigation vers la page de détail
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Détails de: ${sortie.name}'),
-                    duration: const Duration(seconds: 1),
-                  ),
-                );
+                if (widget.onEditSortie != null) {
+                  widget.onEditSortie!(sortie);
+                }
+              },
+              onDelete: () {
+                context.read<SortieCubit>().deleteSortie(sortie.id);
               },
             );
           },
@@ -75,3 +76,4 @@ class _SortieListPageState extends State<SortieListPage> {
     );
   }
 }
+

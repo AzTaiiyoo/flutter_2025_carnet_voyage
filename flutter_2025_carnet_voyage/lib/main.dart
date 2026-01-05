@@ -8,8 +8,10 @@ import 'package:flutter_2025_carnet_voyage/blocs/theme_cubit.dart';
 import 'package:flutter_2025_carnet_voyage/repositories/geo_coding_repository.dart';
 import 'package:flutter_2025_carnet_voyage/repositories/weather_repository.dart';
 import 'package:flutter_2025_carnet_voyage/core/theme/app_theme.dart';
+import 'package:flutter_2025_carnet_voyage/repositories/sortie_repository.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -21,6 +23,7 @@ class MyApp extends StatelessWidget {
     // Création des repositories (peuvent être partagés)
     const GeoCodingRepository geoCodingRepository = GeoCodingRepository();
     const WeatherRepository weatherRepository = WeatherRepository();
+    final SortieRepository sortieRepository = SortieRepository();
 
     return MultiRepositoryProvider(
       providers: [
@@ -28,11 +31,15 @@ class MyApp extends StatelessWidget {
           value: geoCodingRepository,
         ),
         RepositoryProvider<WeatherRepository>.value(value: weatherRepository),
+        RepositoryProvider<SortieRepository>.value(value: sortieRepository),
       ],
       child: MultiBlocProvider(
         providers: [
-          // Cubit pour les sorties (liste)
-          BlocProvider<SortieCubit>(create: (context) => SortieCubit()),
+          // Cubit pour les sorties (liste) avec persistance
+          BlocProvider<SortieCubit>(
+            create: (context) =>
+                SortieCubit(repository: sortieRepository)..loadSorties(),
+          ),
           // Cubit pour la carte
           BlocProvider<MapCubit>(
             create: (context) => MapCubit(
