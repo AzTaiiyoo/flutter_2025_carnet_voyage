@@ -423,7 +423,7 @@ flutter run -d web-server --web-port 8080
 
 ```dart
 class ApiKeys {
-  static const String openWeatherMapApiKey = 'VOTRE_CLE_API_ICI';
+  static const String openWeatherMapApiKey = 'YOUR_API_KEY_HERE';
   static const String openWeatherMapBaseUrl =
       'https://api.openweathermap.org/data/2.5';
 }
