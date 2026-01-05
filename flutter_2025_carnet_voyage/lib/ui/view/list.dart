@@ -54,11 +54,15 @@ class _SortieListPageState extends State<SortieListPage> {
           );
         }
 
+        // Trier les sorties par date (plus récentes en premier)
+        final sortedSorties = List<Sortie>.from(sorties)
+          ..sort((a, b) => b.date.compareTo(a.date));
+
         return ListView.builder(
           padding: AppSpacing.listPadding,
-          itemCount: sorties.length,
+          itemCount: sortedSorties.length,
           itemBuilder: (BuildContext context, int index) {
-            final Sortie sortie = sorties[index];
+            final Sortie sortie = sortedSorties[index];
             return SortieCard(
               sortie: sortie,
               onTap: () {

@@ -3,14 +3,14 @@ import 'package:geocoding/geocoding.dart';
 class Address {
   final String? street;
   final String city;
-  final String postcode;
+  final String? postcode;
   final double? latitude;
   final double? longitude;
 
   Address({
     this.street,
     required this.city,
-    required this.postcode,
+    this.postcode,
     this.latitude,
     this.longitude,
   });
@@ -66,10 +66,15 @@ class Address {
 
   @override
   String toString() {
+    final parts = <String>[];
     if (street != null && street!.isNotEmpty) {
-      return '$street, $city, $postcode';
+      parts.add(street!);
     }
-    return '$city, $postcode';
+    parts.add(city);
+    if (postcode != null && postcode!.isNotEmpty) {
+      parts.add(postcode!);
+    }
+    return parts.join(', ');
   }
 
   /// Retourne une version courte de l'adresse (ville uniquement)

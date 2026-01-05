@@ -1,8 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../models/address.dart';
 import '../../models/sortie.dart';
@@ -10,6 +8,12 @@ import '../../blocs/sortie_cubit.dart';
 import '../../blocs/map_cubit.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_theme_extensions.dart';
+import '../widget/add_activity_form/form_card.dart';
+import '../widget/add_activity_form/section_header.dart';
+import '../widget/add_activity_form/photo_picker_section.dart';
+import '../widget/add_activity_form/address_section.dart';
+import '../widget/add_activity_form/date_picker_field.dart';
+import '../widget/add_activity_form/rating_input.dart';
 
 /// Écran d'ajout d'une nouvelle sortie
 /// Design Life-log premium avec formulaire structuré
@@ -42,7 +46,8 @@ class _AddActivityState extends State<AddActivity> {
   DateTime _selectedDate = DateTime.now();
   double _rating = 0;
   String? _imagePath;
-  final ImagePicker _picker = ImagePicker();
+  double? _latitude;
+  double? _longitude;
 
   final GlobalKey<FormState> _formKey = GlobalKey();
 
@@ -55,7 +60,6 @@ class _AddActivityState extends State<AddActivity> {
   @override
   void didUpdateWidget(AddActivity oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Réinitialiser le formulaire si sortieToEdit a changé
     if (widget.sortieToEdit != oldWidget.sortieToEdit) {
       _initializeForm();
     }
@@ -67,13 +71,14 @@ class _AddActivityState extends State<AddActivity> {
       _nameController.text = sortie.name;
       _streetController.text = sortie.address.street ?? '';
       _cityController.text = sortie.address.city;
-      _postcodeController.text = sortie.address.postcode;
+      _postcodeController.text = sortie.address.postcode ?? '';
       _noteController.text = sortie.note ?? '';
       _selectedDate = sortie.date;
       _rating = sortie.rating ?? 0;
       _imagePath = sortie.imageUrl;
+      _latitude = sortie.address.latitude;
+      _longitude = sortie.address.longitude;
     } else {
-      // Mode ajout : réinitialiser tous les champs
       _nameController.clear();
       _streetController.clear();
       _cityController.clear();
@@ -82,6 +87,8 @@ class _AddActivityState extends State<AddActivity> {
       _selectedDate = DateTime.now();
       _rating = 0;
       _imagePath = null;
+      _latitude = null;
+      _longitude = null;
     }
     _dateController.text = DateFormat('dd/MM/yyyy').format(_selectedDate);
   }
@@ -90,22 +97,16 @@ class _AddActivityState extends State<AddActivity> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // Récupérer l'adresse depuis le MapCubit si elle existe (seulement en mode ajout)
     if (!widget.isEditing) {
       final mapState = context.read<MapCubit>().state;
       if (mapState.hasSelectedAddress) {
         final Address address = mapState.selectedAddress!;
         _streetController.text = address.street ?? '';
         _cityController.text = address.city;
-        _postcodeController.text = address.postcode;
+        _postcodeController.text = address.postcode ?? '';
+        _latitude = address.latitude;
+        _longitude = address.longitude;
       }
-    }
-  }
-
-  void _navigateToMap() {
-    // Naviguer vers la carte pour sélectionner une adresse via callback
-    if (widget.onNavigateToMap != null) {
-      widget.onNavigateToMap!();
     }
   }
 
@@ -120,72 +121,87 @@ class _AddActivityState extends State<AddActivity> {
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-      locale: const Locale('fr', 'FR'),
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-        _dateController.text = DateFormat('dd/MM/yyyy').format(picked);
-      });
-    }
-  }
-
-  Future<void> _pickImageFromGallery() async {
-    final XFile? image = await _picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 1200,
-      maxHeight: 1200,
-      imageQuality: 85,
-    );
-    if (image != null) {
-      setState(() {
-        _imagePath = image.path;
-      });
-    }
-  }
-
-  Future<void> _pickImageFromCamera() async {
-    final XFile? image = await _picker.pickImage(
-      source: ImageSource.camera,
-      maxWidth: 1200,
-      maxHeight: 1200,
-      imageQuality: 85,
-    );
-    if (image != null) {
-      setState(() {
-        _imagePath = image.path;
-      });
-    }
-  }
-
-  void _removeImage() {
+  void _resetForm() {
     setState(() {
+      _nameController.clear();
+      _streetController.clear();
+      _cityController.clear();
+      _postcodeController.clear();
+      _noteController.clear();
+      _selectedDate = DateTime.now();
+      _dateController.text = DateFormat('dd/MM/yyyy').format(_selectedDate);
+      _rating = 0;
       _imagePath = null;
+      _latitude = null;
+      _longitude = null;
     });
+    context.read<MapCubit>().clearSelection();
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      final Address address = Address(
+        street: _streetController.text.isNotEmpty ? _streetController.text : null,
+        city: _cityController.text,
+        postcode: _postcodeController.text,
+        latitude: _latitude,
+        longitude: _longitude,
+      );
+
+      final Sortie sortie = Sortie(
+        id: widget.isEditing
+            ? widget.sortieToEdit!.id
+            : DateTime.now().millisecondsSinceEpoch.toString(),
+        name: _nameController.text,
+        address: address,
+        date: _selectedDate,
+        note: _noteController.text.isNotEmpty ? _noteController.text : null,
+        rating: _rating > 0 ? _rating : null,
+        imageUrl: _imagePath,
+      );
+
+      if (widget.isEditing) {
+        context.read<SortieCubit>().updateSortie(
+              widget.sortieToEdit!.id,
+              sortie,
+            );
+      } else {
+        context.read<SortieCubit>().addSortie(sortie);
+      }
+
+      _resetForm();
+
+      if (widget.onNavigateToList != null) {
+        widget.onNavigateToList!();
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            widget.isEditing
+                ? 'Sortie modifiée avec succès !'
+                : 'Sortie ajoutée avec succès !',
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
-    final lifeLogTheme = theme.extension<LifeLogThemeExtension>()!;
+    final lifeLogTheme = Theme.of(context).extension<LifeLogThemeExtension>()!;
 
     return BlocListener<MapCubit, MapState>(
       listener: (context, state) {
-        // Mettre à jour les champs d'adresse quand une adresse est sélectionnée
         if (state.hasSelectedAddress) {
           final Address address = state.selectedAddress!;
           setState(() {
             _streetController.text = address.street ?? '';
             _cityController.text = address.city;
-            _postcodeController.text = address.postcode;
+            _postcodeController.text = address.postcode ?? '';
+            _latitude = address.latitude;
+            _longitude = address.longitude;
           });
         }
       },
@@ -205,371 +221,52 @@ class _AddActivityState extends State<AddActivity> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   // Nom de l'activité
-                  _buildCard(
-                    context: context,
-                    lifeLogTheme: lifeLogTheme,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSectionHeader(
-                          context: context,
-                          icon: Icons.label,
-                          title: 'Nom',
-                        ),
-                        SizedBox(height: AppSpacing.md),
-                        TextFormField(
-                          controller: _nameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Nom de la sortie',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer le nom de la sortie';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                    ),
+                  _buildNameSection(lifeLogTheme),
+                  SizedBox(height: AppSpacing.ms),
+
+                  // Photo
+                  PhotoPickerSection(
+                    imagePath: _imagePath,
+                    onImageChanged: (path) {
+                      setState(() => _imagePath = path);
+                    },
                   ),
                   SizedBox(height: AppSpacing.ms),
 
-                  // Section Photo
-                  _buildCard(
-                    context: context,
-                    lifeLogTheme: lifeLogTheme,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSectionHeader(
-                          context: context,
-                          icon: Icons.photo_camera,
-                          title: 'Photo (optionnel)',
-                        ),
-                        SizedBox(height: AppSpacing.md),
-                        if (_imagePath != null) ...[
-                          // Aperçu de l'image
-                          Stack(
-                            alignment: Alignment.topRight,
-                            children: [
-                              ClipRRect(
-                                borderRadius: AppSpacing.photoRadius,
-                                child: Image.file(
-                                  File(_imagePath!),
-                                  height: 200,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Positioned(
-                                top: AppSpacing.sm,
-                                right: AppSpacing.sm,
-                                child: GestureDetector(
-                                  onTap: _removeImage,
-                                  child: Container(
-                                    padding: EdgeInsets.all(AppSpacing.xs),
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.error.withValues(
-                                        alpha: 0.9,
-                                      ),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      Icons.close,
-                                      color: colorScheme.onError,
-                                      size: AppSpacing.iconMs,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: AppSpacing.ms),
-                        ],
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: _pickImageFromGallery,
-                                icon: const Icon(Icons.photo_library),
-                                label: const Text('Galerie'),
-                              ),
-                            ),
-                            SizedBox(width: AppSpacing.ms),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: _pickImageFromCamera,
-                                icon: const Icon(Icons.camera_alt),
-                                label: const Text('Appareil'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: AppSpacing.ms),
-
-                  // Section Adresse
-                  _buildCard(
-                    context: context,
-                    lifeLogTheme: lifeLogTheme,
-                    onTap: _navigateToMap,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.location_on,
-                              color: lifeLogTheme.iconColorSecondary,
-                            ),
-                            SizedBox(width: AppSpacing.sm),
-                            Text(
-                              'Adresse',
-                              style: textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const Spacer(),
-                            Icon(Icons.map, color: colorScheme.primary),
-                            SizedBox(width: AppSpacing.xs),
-                            Text(
-                              'Choisir sur la carte',
-                              style: textTheme.labelSmall?.copyWith(
-                                color: colorScheme.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: AppSpacing.md),
-                        TextFormField(
-                          controller: _streetController,
-                          decoration: const InputDecoration(
-                            labelText: 'Rue (optionnel)',
-                          ),
-                          enabled: false,
-                        ),
-                        SizedBox(height: AppSpacing.ms),
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: TextFormField(
-                                controller: _cityController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Ville',
-                                ),
-                                enabled: false,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Ville requise';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            SizedBox(width: AppSpacing.ms),
-                            Expanded(
-                              child: TextFormField(
-                                controller: _postcodeController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Code postal',
-                                ),
-                                enabled: false,
-                                keyboardType: TextInputType.number,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Requis';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                  // Adresse
+                  AddressSection(
+                    streetController: _streetController,
+                    cityController: _cityController,
+                    postcodeController: _postcodeController,
+                    onNavigateToMap: widget.onNavigateToMap,
                   ),
                   SizedBox(height: AppSpacing.ms),
 
                   // Date
-                  _buildCard(
-                    context: context,
-                    lifeLogTheme: lifeLogTheme,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSectionHeader(
-                          context: context,
-                          icon: Icons.calendar_today,
-                          title: 'Date',
-                        ),
-                        SizedBox(height: AppSpacing.md),
-                        TextFormField(
-                          controller: _dateController,
-                          readOnly: true,
-                          onTap: () => _selectDate(context),
-                          decoration: const InputDecoration(
-                            labelText: 'Date de la sortie',
-                            suffixIcon: Icon(Icons.arrow_drop_down),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Veuillez sélectionner une date';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                    ),
+                  DatePickerField(
+                    controller: _dateController,
+                    selectedDate: _selectedDate,
+                    onDateChanged: (date) {
+                      setState(() => _selectedDate = date);
+                    },
                   ),
                   SizedBox(height: AppSpacing.ms),
 
-                  // Note / Commentaire
-                  _buildCard(
-                    context: context,
-                    lifeLogTheme: lifeLogTheme,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSectionHeader(
-                          context: context,
-                          icon: Icons.notes,
-                          title: 'Notes',
-                        ),
-                        SizedBox(height: AppSpacing.md),
-                        TextFormField(
-                          controller: _noteController,
-                          maxLines: 3,
-                          decoration: const InputDecoration(
-                            labelText: 'Commentaires (optionnel)',
-                            alignLabelWithHint: true,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // Notes
+                  _buildNotesSection(lifeLogTheme),
                   SizedBox(height: AppSpacing.ms),
 
                   // Rating
-                  _buildCard(
-                    context: context,
-                    lifeLogTheme: lifeLogTheme,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSectionHeader(
-                          context: context,
-                          icon: Icons.star,
-                          title: 'Note',
-                        ),
-                        SizedBox(height: AppSpacing.sm),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(5, (index) {
-                            return IconButton(
-                              icon: Icon(
-                                index < _rating
-                                    ? Icons.star
-                                    : Icons.star_border,
-                                color: lifeLogTheme.ratingStarColor,
-                                size: 36,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _rating = index + 1.0;
-                                });
-                              },
-                            );
-                          }),
-                        ),
-                        if (_rating > 0)
-                          Center(
-                            child: TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  _rating = 0;
-                                });
-                              },
-                              child: const Text('Effacer la note'),
-                            ),
-                          ),
-                      ],
-                    ),
+                  RatingInput(
+                    rating: _rating,
+                    onRatingChanged: (value) {
+                      setState(() => _rating = value);
+                    },
                   ),
                   SizedBox(height: AppSpacing.lg),
 
-                  // Bouton Ajouter/Modifier
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        // BUG FIX: Récupérer les coordonnées depuis MapCubit
-                        final mapState = context.read<MapCubit>().state;
-
-                        final Address address = Address(
-                          street: _streetController.text.isNotEmpty
-                              ? _streetController.text
-                              : null,
-                          city: _cityController.text,
-                          postcode: _postcodeController.text,
-                          // Copier les coordonnées pour que les marqueurs s'affichent
-                          latitude: mapState.selectedAddress?.latitude,
-                          longitude: mapState.selectedAddress?.longitude,
-                        );
-
-                        final Sortie sortie = Sortie(
-                          id: widget.isEditing
-                              ? widget.sortieToEdit!.id
-                              : DateTime.now().millisecondsSinceEpoch
-                                    .toString(),
-                          name: _nameController.text,
-                          address: address,
-                          date: _selectedDate,
-                          note: _noteController.text.isNotEmpty
-                              ? _noteController.text
-                              : null,
-                          rating: _rating > 0 ? _rating : null,
-                          imageUrl: _imagePath,
-                        );
-
-                        if (widget.isEditing) {
-                          context.read<SortieCubit>().updateSortie(
-                            widget.sortieToEdit!.id,
-                            sortie,
-                          );
-                        } else {
-                          context.read<SortieCubit>().addSortie(sortie);
-                        }
-
-                        // BUG FIX: Réinitialiser le formulaire pour la prochaine activité
-                        _resetForm();
-
-                        // Naviguer vers la liste via callback (IndexedStack, pas Navigator)
-                        if (widget.onNavigateToList != null) {
-                          widget.onNavigateToList!();
-                        }
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              widget.isEditing
-                                  ? 'Sortie modifiée avec succès !'
-                                  : 'Sortie ajoutée avec succès !',
-                            ),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      }
-                    },
-                    icon: Icon(widget.isEditing ? Icons.save : Icons.add),
-                    label: Text(
-                      widget.isEditing ? 'Enregistrer' : 'Ajouter la sortie',
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                  ),
+                  // Bouton Submit
+                  _buildSubmitButton(),
                 ],
               ),
             ),
@@ -579,59 +276,66 @@ class _AddActivityState extends State<AddActivity> {
     );
   }
 
-  /// Construit une carte avec le style Life-log
-  Widget _buildCard({
-    required BuildContext context,
-    required LifeLogThemeExtension lifeLogTheme,
-    required Widget child,
-    VoidCallback? onTap,
-  }) {
-    return Container(
-      decoration: lifeLogTheme.cardDecoration,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: AppSpacing.cardRadius,
-          child: Padding(padding: AppSpacing.cardPadding, child: child),
-        ),
+  Widget _buildNameSection(LifeLogThemeExtension lifeLogTheme) {
+    return FormCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SectionHeader(
+            icon: Icons.label,
+            title: 'Nom',
+          ),
+          SizedBox(height: AppSpacing.md),
+          TextFormField(
+            controller: _nameController,
+            decoration: const InputDecoration(
+              labelText: 'Nom de la sortie',
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Veuillez entrer le nom de la sortie';
+              }
+              return null;
+            },
+          ),
+        ],
       ),
     );
   }
 
-  /// Construit un en-tête de section avec icône et titre
-  Widget _buildSectionHeader({
-    required BuildContext context,
-    required IconData icon,
-    required String title,
-  }) {
-    final theme = Theme.of(context);
-    final lifeLogTheme = theme.extension<LifeLogThemeExtension>()!;
-    final textTheme = theme.textTheme;
-
-    return Row(
-      children: [
-        Icon(icon, color: lifeLogTheme.iconColorSecondary),
-        SizedBox(width: AppSpacing.sm),
-        Text(
-          title,
-          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-        ),
-      ],
+  Widget _buildNotesSection(LifeLogThemeExtension lifeLogTheme) {
+    return FormCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SectionHeader(
+            icon: Icons.notes,
+            title: 'Notes',
+          ),
+          SizedBox(height: AppSpacing.md),
+          TextFormField(
+            controller: _noteController,
+            maxLines: 3,
+            decoration: const InputDecoration(
+              labelText: 'Commentaires (optionnel)',
+              alignLabelWithHint: true,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  void _resetForm() {
-    setState(() {
-      _nameController.clear();
-      _streetController.clear();
-      _cityController.clear();
-      _postcodeController.clear();
-      _noteController.clear();
-      _selectedDate = DateTime.now();
-      _dateController.text = DateFormat('dd/MM/yyyy').format(_selectedDate);
-      _rating = 0;
-    });
-    context.read<MapCubit>().clearSelection();
+  Widget _buildSubmitButton() {
+    return ElevatedButton.icon(
+      onPressed: _submitForm,
+      icon: Icon(widget.isEditing ? Icons.save : Icons.add),
+      label: Text(
+        widget.isEditing ? 'Enregistrer' : 'Ajouter la sortie',
+      ),
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+      ),
+    );
   }
 }
