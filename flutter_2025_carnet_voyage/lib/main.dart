@@ -6,6 +6,7 @@ import 'package:flutter_2025_carnet_voyage/blocs/sortie_cubit.dart';
 import 'package:flutter_2025_carnet_voyage/blocs/map_cubit.dart';
 import 'package:flutter_2025_carnet_voyage/repositories/geo_coding_repository.dart';
 import 'package:flutter_2025_carnet_voyage/repositories/weather_repository.dart';
+import 'package:flutter_2025_carnet_voyage/core/theme/app_theme.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,16 +26,12 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<GeoCodingRepository>.value(
           value: geoCodingRepository,
         ),
-        RepositoryProvider<WeatherRepository>.value(
-          value: weatherRepository,
-        ),
+        RepositoryProvider<WeatherRepository>.value(value: weatherRepository),
       ],
       child: MultiBlocProvider(
         providers: [
           // Cubit pour les sorties (liste)
-          BlocProvider<SortieCubit>(
-            create: (context) => SortieCubit(),
-          ),
+          BlocProvider<SortieCubit>(create: (context) => SortieCubit()),
           // Cubit pour la carte
           BlocProvider<MapCubit>(
             create: (context) => MapCubit(
@@ -53,16 +50,12 @@ class MyApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: const [
-            Locale('fr', 'FR'),
-            Locale('en', 'US'),
-          ],
+          supportedLocales: const [Locale('fr', 'FR'), Locale('en', 'US')],
           locale: const Locale('fr', 'FR'),
 
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
-            useMaterial3: true,
-          ),
+          theme: AppTheme.light(),
+          darkTheme: AppTheme.dark(),
+          themeMode: ThemeMode.system,
           routes: Routes.allRoutes,
           initialRoute: Routes.home,
         ),

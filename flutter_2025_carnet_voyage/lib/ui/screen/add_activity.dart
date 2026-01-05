@@ -8,7 +8,11 @@ import '../../models/address.dart';
 import '../../models/sortie.dart';
 import '../../blocs/sortie_cubit.dart';
 import '../../blocs/map_cubit.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_theme_extensions.dart';
 
+/// Écran d'ajout d'une nouvelle sortie
+/// Design Life-log premium avec formulaire structuré
 class AddActivity extends StatefulWidget {
   final VoidCallback? onNavigateToMap;
   final VoidCallback? onNavigateToList;
@@ -124,6 +128,11 @@ class _AddActivityState extends State<AddActivity> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    final lifeLogTheme = theme.extension<LifeLogThemeExtension>()!;
+
     return BlocListener<MapCubit, MapState>(
       listener: (context, state) {
         // Mettre à jour les champs d'adresse quand une adresse est sélectionnée
@@ -138,385 +147,313 @@ class _AddActivityState extends State<AddActivity> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Ajouter une sortie'),
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          title: Text(
+            'Ajouter une sortie',
+            style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: colorScheme.primaryContainer,
         ),
         body: SingleChildScrollView(
           child: Container(
-            margin: const EdgeInsets.all(16.0),
+            margin: AppSpacing.screenPadding,
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   // Nom de l'activité
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.label, color: Colors.grey[600]),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Nom',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                  _buildCard(
+                    context: context,
+                    lifeLogTheme: lifeLogTheme,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                          context: context,
+                          icon: Icons.label,
+                          title: 'Nom',
+                        ),
+                        SizedBox(height: AppSpacing.md),
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Nom de la sortie',
                           ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _nameController,
-                            decoration: const InputDecoration(
-                              labelText: 'Nom de la sortie',
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Veuillez entrer le nom de la sortie';
-                              }
-                              return null;
-                            },
-                          ),
-                        ],
-                      ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Veuillez entrer le nom de la sortie';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: AppSpacing.ms),
 
                   // Section Photo
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+                  _buildCard(
+                    context: context,
+                    lifeLogTheme: lifeLogTheme,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                          context: context,
+                          icon: Icons.photo_camera,
+                          title: 'Photo (optionnel)',
+                        ),
+                        SizedBox(height: AppSpacing.md),
+                        if (_imagePath != null) ...[
+                          // Aperçu de l'image
+                          Stack(
+                            alignment: Alignment.topRight,
                             children: [
-                              Icon(Icons.photo_camera, color: Colors.grey[600]),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Photo (optionnel)',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                              ClipRRect(
+                                borderRadius: AppSpacing.photoRadius,
+                                child: Image.file(
+                                  File(_imagePath!),
+                                  height: 200,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          if (_imagePath != null) ...[
-                            // Aperçu de l'image
-                            Stack(
-                              alignment: Alignment.topRight,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.file(
-                                    File(_imagePath!),
-                                    height: 200,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 8,
-                                  right: 8,
-                                  child: GestureDetector(
-                                    onTap: _removeImage,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red.withAlpha(200),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.close,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
+                              Positioned(
+                                top: AppSpacing.sm,
+                                right: AppSpacing.sm,
+                                child: GestureDetector(
+                                  onTap: _removeImage,
+                                  child: Container(
+                                    padding: EdgeInsets.all(AppSpacing.xs),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.error.withOpacity(0.9),
+                                      shape: BoxShape.circle,
                                     ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                          ],
-                          Row(
-                            children: [
-                              Expanded(
-                                child: OutlinedButton.icon(
-                                  onPressed: _pickImageFromGallery,
-                                  icon: const Icon(Icons.photo_library),
-                                  label: const Text('Galerie'),
-                                  style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: OutlinedButton.icon(
-                                  onPressed: _pickImageFromCamera,
-                                  icon: const Icon(Icons.camera_alt),
-                                  label: const Text('Appareil'),
-                                  style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12,
+                                    child: Icon(
+                                      Icons.close,
+                                      color: colorScheme.onError,
+                                      size: AppSpacing.iconMs,
                                     ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
+                          SizedBox(height: AppSpacing.ms),
                         ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Section Adresse
-                  Card(
-                    child: InkWell(
-                      onTap: _navigateToMap,
-                      borderRadius: BorderRadius.circular(12),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
                           children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.location_on,
-                                  color: Colors.grey[600],
-                                ),
-                                const SizedBox(width: 8),
-                                const Text(
-                                  'Adresse',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const Spacer(),
-                                Icon(
-                                  Icons.map,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Choisir sur la carte',
-                                  style: TextStyle(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            TextFormField(
-                              controller: _streetController,
-                              decoration: const InputDecoration(
-                                labelText: 'Rue (optionnel)',
-                                border: OutlineInputBorder(),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: _pickImageFromGallery,
+                                icon: const Icon(Icons.photo_library),
+                                label: const Text('Galerie'),
                               ),
-                              enabled: false,
                             ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  flex: 2,
-                                  child: TextFormField(
-                                    controller: _cityController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Ville',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    enabled: false,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Ville requise';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _postcodeController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Code postal',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    enabled: false,
-                                    keyboardType: TextInputType.number,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Requis';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
+                            SizedBox(width: AppSpacing.ms),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: _pickImageFromCamera,
+                                icon: const Icon(Icons.camera_alt),
+                                label: const Text('Appareil'),
+                              ),
                             ),
                           ],
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: AppSpacing.ms),
+
+                  // Section Adresse
+                  _buildCard(
+                    context: context,
+                    lifeLogTheme: lifeLogTheme,
+                    onTap: _navigateToMap,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.location_on,
+                              color: lifeLogTheme.iconColorSecondary,
+                            ),
+                            SizedBox(width: AppSpacing.sm),
+                            Text(
+                              'Adresse',
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const Spacer(),
+                            Icon(Icons.map, color: colorScheme.primary),
+                            SizedBox(width: AppSpacing.xs),
+                            Text(
+                              'Choisir sur la carte',
+                              style: textTheme.labelSmall?.copyWith(
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: AppSpacing.md),
+                        TextFormField(
+                          controller: _streetController,
+                          decoration: const InputDecoration(
+                            labelText: 'Rue (optionnel)',
+                          ),
+                          enabled: false,
+                        ),
+                        SizedBox(height: AppSpacing.ms),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: TextFormField(
+                                controller: _cityController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Ville',
+                                ),
+                                enabled: false,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Ville requise';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                            SizedBox(width: AppSpacing.ms),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _postcodeController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Code postal',
+                                ),
+                                enabled: false,
+                                keyboardType: TextInputType.number,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Requis';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.ms),
 
                   // Date
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.calendar_today,
-                                color: Colors.grey[600],
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Date',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                  _buildCard(
+                    context: context,
+                    lifeLogTheme: lifeLogTheme,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                          context: context,
+                          icon: Icons.calendar_today,
+                          title: 'Date',
+                        ),
+                        SizedBox(height: AppSpacing.md),
+                        TextFormField(
+                          controller: _dateController,
+                          readOnly: true,
+                          onTap: () => _selectDate(context),
+                          decoration: const InputDecoration(
+                            labelText: 'Date de la sortie',
+                            suffixIcon: Icon(Icons.arrow_drop_down),
                           ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _dateController,
-                            readOnly: true,
-                            onTap: () => _selectDate(context),
-                            decoration: const InputDecoration(
-                              labelText: 'Date de la sortie',
-                              border: OutlineInputBorder(),
-                              suffixIcon: Icon(Icons.arrow_drop_down),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Veuillez sélectionner une date';
-                              }
-                              return null;
-                            },
-                          ),
-                        ],
-                      ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Veuillez sélectionner une date';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: AppSpacing.ms),
 
                   // Note / Commentaire
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.notes, color: Colors.grey[600]),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Notes',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                  _buildCard(
+                    context: context,
+                    lifeLogTheme: lifeLogTheme,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                          context: context,
+                          icon: Icons.notes,
+                          title: 'Notes',
+                        ),
+                        SizedBox(height: AppSpacing.md),
+                        TextFormField(
+                          controller: _noteController,
+                          maxLines: 3,
+                          decoration: const InputDecoration(
+                            labelText: 'Commentaires (optionnel)',
+                            alignLabelWithHint: true,
                           ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _noteController,
-                            maxLines: 3,
-                            decoration: const InputDecoration(
-                              labelText: 'Commentaires (optionnel)',
-                              border: OutlineInputBorder(),
-                              alignLabelWithHint: true,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: AppSpacing.ms),
 
                   // Rating
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.star, color: Colors.grey[600]),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Note',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                  _buildCard(
+                    context: context,
+                    lifeLogTheme: lifeLogTheme,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                          context: context,
+                          icon: Icons.star,
+                          title: 'Note',
+                        ),
+                        SizedBox(height: AppSpacing.sm),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(5, (index) {
+                            return IconButton(
+                              icon: Icon(
+                                index < _rating
+                                    ? Icons.star
+                                    : Icons.star_border,
+                                color: lifeLogTheme.ratingStarColor,
+                                size: 36,
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(5, (index) {
-                              return IconButton(
-                                icon: Icon(
-                                  index < _rating
-                                      ? Icons.star
-                                      : Icons.star_border,
-                                  color: Colors.amber,
-                                  size: 36,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _rating = index + 1.0;
-                                  });
-                                },
-                              );
-                            }),
-                          ),
-                          if (_rating > 0)
-                            Center(
-                              child: TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _rating = 0;
-                                  });
-                                },
-                                child: const Text('Effacer la note'),
-                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _rating = index + 1.0;
+                                });
+                              },
+                            );
+                          }),
+                        ),
+                        if (_rating > 0)
+                          Center(
+                            child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _rating = 0;
+                                });
+                              },
+                              child: const Text('Effacer la note'),
                             ),
-                        ],
-                      ),
+                          ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: AppSpacing.lg),
 
                   // Bouton Ajouter
                   ElevatedButton.icon(
@@ -549,18 +486,15 @@ class _AddActivityState extends State<AddActivity> {
                         }
 
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Sortie ajoutée avec succès !'),
-                            backgroundColor: Colors.green,
+                          SnackBar(
+                            content: const Text('Sortie ajoutée avec succès !'),
+                            backgroundColor: colorScheme.secondary,
                           ),
                         );
                       }
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Ajouter la sortie'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
                   ),
                 ],
               ),
@@ -568,6 +502,48 @@ class _AddActivityState extends State<AddActivity> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Construit une carte avec le style Life-log
+  Widget _buildCard({
+    required BuildContext context,
+    required LifeLogThemeExtension lifeLogTheme,
+    required Widget child,
+    VoidCallback? onTap,
+  }) {
+    return Container(
+      decoration: lifeLogTheme.cardDecoration,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: AppSpacing.cardRadius,
+          child: Padding(padding: AppSpacing.cardPadding, child: child),
+        ),
+      ),
+    );
+  }
+
+  /// Construit un en-tête de section avec icône et titre
+  Widget _buildSectionHeader({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+  }) {
+    final theme = Theme.of(context);
+    final lifeLogTheme = theme.extension<LifeLogThemeExtension>()!;
+    final textTheme = theme.textTheme;
+
+    return Row(
+      children: [
+        Icon(icon, color: lifeLogTheme.iconColorSecondary),
+        SizedBox(width: AppSpacing.sm),
+        Text(
+          title,
+          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
+      ],
     );
   }
 

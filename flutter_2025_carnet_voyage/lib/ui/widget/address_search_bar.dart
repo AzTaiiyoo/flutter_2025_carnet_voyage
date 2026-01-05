@@ -4,8 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_2025_carnet_voyage/blocs/map_cubit.dart';
 import 'package:flutter_2025_carnet_voyage/models/address.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_shadows.dart';
+import '../../core/theme/app_theme_extensions.dart';
 
 /// Widget de barre de recherche d'adresses
+/// Design Life-log premium avec coins arrondis et ombres
 class AddressSearchBar extends StatefulWidget {
   const AddressSearchBar({super.key});
 
@@ -60,31 +64,40 @@ class _AddressSearchBarState extends State<AddressSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    final lifeLogTheme = theme.extension<LifeLogThemeExtension>()!;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         // Barre de recherche
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            color: colorScheme.surface,
+            borderRadius: AppSpacing.smallRadius,
+            boxShadow: AppShadows.searchBar,
           ),
           child: TextField(
             controller: _controller,
             focusNode: _focusNode,
+            style: textTheme.bodyLarge,
             decoration: InputDecoration(
               hintText: 'Rechercher une adresse...',
-              prefixIcon: const Icon(Icons.search, color: Colors.grey),
+              hintStyle: textTheme.bodyMedium?.copyWith(
+                color: lifeLogTheme.iconColorSecondary,
+              ),
+              prefixIcon: Icon(
+                Icons.search,
+                color: lifeLogTheme.iconColorSecondary,
+              ),
               suffixIcon: _controller.text.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear, color: Colors.grey),
+                      icon: Icon(
+                        Icons.clear,
+                        color: lifeLogTheme.iconColorSecondary,
+                      ),
                       onPressed: () {
                         _controller.clear();
                         context.read<MapCubit>().clearSelection();
@@ -92,9 +105,9 @@ class _AddressSearchBarState extends State<AddressSearchBar> {
                     )
                   : null,
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.ms + 2,
               ),
             ),
             onChanged: _onSearchChanged,
@@ -107,23 +120,21 @@ class _AddressSearchBarState extends State<AddressSearchBar> {
             builder: (context, state) {
               if (state.isLoading) {
                 return Container(
-                  margin: const EdgeInsets.only(top: 4),
-                  padding: const EdgeInsets.all(16),
+                  margin: EdgeInsets.only(top: AppSpacing.xs),
+                  padding: AppSpacing.cardPadding,
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                      ),
-                    ],
+                    color: colorScheme.surface,
+                    borderRadius: AppSpacing.smallRadius,
+                    boxShadow: AppShadows.soft,
                   ),
-                  child: const Center(
+                  child: Center(
                     child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      width: AppSpacing.iconMd,
+                      height: AppSpacing.iconMd,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: colorScheme.primary,
+                      ),
                     ),
                   ),
                 );
@@ -134,17 +145,12 @@ class _AddressSearchBarState extends State<AddressSearchBar> {
               }
 
               return Container(
-                margin: const EdgeInsets.only(top: 4),
+                margin: EdgeInsets.only(top: AppSpacing.xs),
                 constraints: const BoxConstraints(maxHeight: 200),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                    ),
-                  ],
+                  color: colorScheme.surface,
+                  borderRadius: AppSpacing.smallRadius,
+                  boxShadow: AppShadows.medium,
                 ),
                 child: ListView.builder(
                   shrinkWrap: true,
@@ -153,17 +159,17 @@ class _AddressSearchBarState extends State<AddressSearchBar> {
                   itemBuilder: (context, index) {
                     final Address address = state.searchResults[index];
                     return ListTile(
-                      leading: const Icon(
+                      leading: Icon(
                         Icons.location_on,
-                        color: Colors.green,
+                        color: colorScheme.secondary,
                       ),
                       title: Text(
                         address.street ?? address.city,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        style: textTheme.titleSmall,
                       ),
                       subtitle: Text(
                         '${address.city}, ${address.postcode}',
-                        style: TextStyle(color: Colors.grey[600]),
+                        style: textTheme.bodySmall,
                       ),
                       onTap: () => _onAddressSelected(address),
                     );

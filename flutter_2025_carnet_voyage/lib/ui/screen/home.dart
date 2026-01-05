@@ -3,6 +3,8 @@ import 'package:flutter_2025_carnet_voyage/ui/screen/add_activity.dart';
 import 'package:flutter_2025_carnet_voyage/ui/view/map_view.dart';
 import '../view/list.dart';
 
+/// Écran principal avec navigation bottom bar
+/// Design Life-log premium avec palette nature
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -46,13 +48,17 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           _titles[currentPageIndex],
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        backgroundColor: colorScheme.primaryContainer,
         elevation: 0,
         leading: currentPageIndex == 2
             ? IconButton(
@@ -79,7 +85,7 @@ class _HomeState extends State<Home> {
             currentPageIndex = index;
           });
         },
-        indicatorColor: Theme.of(context).colorScheme.primaryContainer,
+        indicatorColor: colorScheme.primaryContainer,
         selectedIndex: currentPageIndex > 1 ? 0 : currentPageIndex,
         destinations: const <Widget>[
           NavigationDestination(

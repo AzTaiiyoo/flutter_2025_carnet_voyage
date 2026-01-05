@@ -1,38 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_2025_carnet_voyage/blocs/map_cubit.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_shadows.dart';
+import '../../core/theme/app_theme_extensions.dart';
 
 /// Widget affichant les informations d'une adresse et sa météo
+/// Design Life-log premium avec coins arrondis et ombres douces
 class AddressInfoWidget extends StatelessWidget {
   const AddressInfoWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    final lifeLogTheme = theme.extension<LifeLogThemeExtension>()!;
+
     return BlocBuilder<MapCubit, MapState>(
       builder: (context, state) {
         // Si pas d'adresse sélectionnée, afficher un message
         if (!state.hasSelectedAddress) {
           return Container(
-            padding: const EdgeInsets.all(16),
+            padding: AppSpacing.cardPadding,
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              color: colorScheme.surface,
+              borderRadius: AppSpacing.cardRadius,
+              boxShadow: AppShadows.card,
             ),
             child: Row(
               children: [
-                Icon(Icons.touch_app, color: Colors.grey[400], size: 32),
-                const SizedBox(width: 12),
+                Icon(
+                  Icons.touch_app,
+                  color: lifeLogTheme.iconColorSecondary,
+                  size: AppSpacing.iconLg,
+                ),
+                SizedBox(width: AppSpacing.ms),
                 Expanded(
                   child: Text(
                     'Recherchez une adresse ou touchez la carte',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    style: textTheme.bodyMedium,
                   ),
                 ),
               ],
@@ -44,17 +51,11 @@ class AddressInfoWidget extends StatelessWidget {
         final weather = state.weather;
 
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: AppSpacing.cardPadding,
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            color: colorScheme.surface,
+            borderRadius: AppSpacing.cardRadius,
+            boxShadow: AppShadows.card,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,21 +70,16 @@ class AddressInfoWidget extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Weather',
-                          style: TextStyle(
-                            fontSize: 16,
+                          style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w500,
-                            color: Colors.black87,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: AppSpacing.xs),
                         Text(
                           weather?.locationName ?? address.city,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
+                          style: textTheme.bodyMedium,
                         ),
                       ],
                     ),
@@ -96,32 +92,31 @@ class AddressInfoWidget extends StatelessWidget {
                       children: [
                         Text(
                           weather.formattedTemperature,
-                          style: TextStyle(
-                            fontSize: 32,
+                          style: textTheme.displaySmall?.copyWith(
                             fontWeight: FontWeight.w300,
-                            color: Theme.of(context).colorScheme.primary,
+                            color: colorScheme.primary,
                           ),
                         ),
                         Text(
                           _capitalizeFirst(weather.description),
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[600],
-                          ),
+                          style: textTheme.bodySmall,
                         ),
                       ],
                     ),
                   ] else if (state.isLoading) ...[
-                    const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                    SizedBox(
+                      width: AppSpacing.iconMd,
+                      height: AppSpacing.iconMd,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: colorScheme.primary,
+                      ),
                     ),
                   ],
                 ],
               ),
 
-              const SizedBox(height: 16),
+              SizedBox(height: AppSpacing.md),
 
               // Détails météo
               if (weather != null)
@@ -149,21 +144,20 @@ class AddressInfoWidget extends StatelessWidget {
               // Erreur météo
               if (state.errorMessage != null && !state.hasWeather)
                 Padding(
-                  padding: const EdgeInsets.only(top: 8),
+                  padding: EdgeInsets.only(top: AppSpacing.sm),
                   child: Row(
                     children: [
                       Icon(
                         Icons.warning_amber,
-                        color: Colors.orange[700],
-                        size: 16,
+                        color: colorScheme.tertiary,
+                        size: AppSpacing.iconSm,
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Text(
                           state.errorMessage!,
-                          style: TextStyle(
-                            color: Colors.orange[700],
-                            fontSize: 12,
+                          style: textTheme.labelSmall?.copyWith(
+                            color: colorScheme.tertiary,
                           ),
                         ),
                       ),
@@ -174,18 +168,18 @@ class AddressInfoWidget extends StatelessWidget {
               // Coordonnées (optionnel)
               if (address.hasCoordinates)
                 Padding(
-                  padding: const EdgeInsets.only(top: 12),
+                  padding: EdgeInsets.only(top: AppSpacing.ms),
                   child: Row(
                     children: [
                       Icon(
                         Icons.location_on,
-                        color: Colors.grey[400],
-                        size: 14,
+                        color: lifeLogTheme.iconColorSecondary,
+                        size: AppSpacing.iconSm - 2,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: AppSpacing.xs),
                       Text(
                         address.formattedCoordinates,
-                        style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                        style: textTheme.labelSmall,
                       ),
                     ],
                   ),
@@ -217,27 +211,24 @@ class _WeatherDetailItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
     return Column(
       children: [
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 16, color: Colors.blue[400]),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-            ),
+            Icon(icon, size: AppSpacing.iconSm, color: colorScheme.secondary),
+            SizedBox(width: AppSpacing.xs),
+            Text(label, style: textTheme.labelSmall),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: AppSpacing.xs),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
+          style: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
       ],
     );
