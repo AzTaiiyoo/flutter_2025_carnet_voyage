@@ -8,21 +8,21 @@ import '../../blocs/sortie_cubit.dart';
 import '../../blocs/map_cubit.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_theme_extensions.dart';
-import '../widget/add_activity_form/form_card.dart';
-import '../widget/add_activity_form/section_header.dart';
-import '../widget/add_activity_form/photo_picker_section.dart';
-import '../widget/add_activity_form/address_section.dart';
-import '../widget/add_activity_form/date_picker_field.dart';
-import '../widget/add_activity_form/rating_input.dart';
+import '../widget/add_sortie_form/form_card.dart';
+import '../widget/add_sortie_form/section_header.dart';
+import '../widget/add_sortie_form/photo_picker_section.dart';
+import '../widget/add_sortie_form/address_section.dart';
+import '../widget/add_sortie_form/date_picker_field.dart';
+import '../widget/add_sortie_form/rating_input.dart';
 
 /// Écran d'ajout d'une nouvelle sortie
 /// Design Life-log premium avec formulaire structuré
-class AddActivity extends StatefulWidget {
+class AddSortie extends StatefulWidget {
   final VoidCallback? onNavigateToMap;
   final VoidCallback? onNavigateToList;
   final Sortie? sortieToEdit;
 
-  const AddActivity({
+  const AddSortie({
     super.key,
     this.onNavigateToMap,
     this.onNavigateToList,
@@ -32,10 +32,10 @@ class AddActivity extends StatefulWidget {
   bool get isEditing => sortieToEdit != null;
 
   @override
-  State<AddActivity> createState() => _AddActivityState();
+  State<AddSortie> createState() => _AddSortieState();
 }
 
-class _AddActivityState extends State<AddActivity> {
+class _AddSortieState extends State<AddSortie> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _streetController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
@@ -58,7 +58,7 @@ class _AddActivityState extends State<AddActivity> {
   }
 
   @override
-  void didUpdateWidget(AddActivity oldWidget) {
+  void didUpdateWidget(AddSortie oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.sortieToEdit != oldWidget.sortieToEdit) {
       _initializeForm();
@@ -141,7 +141,9 @@ class _AddActivityState extends State<AddActivity> {
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       final Address address = Address(
-        street: _streetController.text.isNotEmpty ? _streetController.text : null,
+        street: _streetController.text.isNotEmpty
+            ? _streetController.text
+            : null,
         city: _cityController.text,
         postcode: _postcodeController.text,
         latitude: _latitude,
@@ -162,9 +164,9 @@ class _AddActivityState extends State<AddActivity> {
 
       if (widget.isEditing) {
         context.read<SortieCubit>().updateSortie(
-              widget.sortieToEdit!.id,
-              sortie,
-            );
+          widget.sortieToEdit!.id,
+          sortie,
+        );
       } else {
         context.read<SortieCubit>().addSortie(sortie);
       }
@@ -281,16 +283,11 @@ class _AddActivityState extends State<AddActivity> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionHeader(
-            icon: Icons.label,
-            title: 'Nom',
-          ),
+          const SectionHeader(icon: Icons.label, title: 'Nom'),
           SizedBox(height: AppSpacing.md),
           TextFormField(
             controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'Nom de la sortie',
-            ),
+            decoration: const InputDecoration(labelText: 'Nom de la sortie'),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Veuillez entrer le nom de la sortie';
@@ -308,10 +305,7 @@ class _AddActivityState extends State<AddActivity> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionHeader(
-            icon: Icons.notes,
-            title: 'Notes',
-          ),
+          const SectionHeader(icon: Icons.notes, title: 'Notes'),
           SizedBox(height: AppSpacing.md),
           TextFormField(
             controller: _noteController,
@@ -330,9 +324,7 @@ class _AddActivityState extends State<AddActivity> {
     return ElevatedButton.icon(
       onPressed: _submitForm,
       icon: Icon(widget.isEditing ? Icons.save : Icons.add),
-      label: Text(
-        widget.isEditing ? 'Enregistrer' : 'Ajouter la sortie',
-      ),
+      label: Text(widget.isEditing ? 'Enregistrer' : 'Ajouter la sortie'),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16),
       ),

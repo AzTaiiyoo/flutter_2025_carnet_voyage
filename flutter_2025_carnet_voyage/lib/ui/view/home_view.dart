@@ -7,16 +7,16 @@ import '../../core/theme/app_spacing.dart';
 import '../widget/sortie_card.dart';
 
 /// Page de liste des sorties avec design Life-log premium
-class SortieListPage extends StatefulWidget {
+class HomeView extends StatefulWidget {
   final void Function(Sortie)? onEditSortie;
 
-  const SortieListPage({super.key, this.onEditSortie});
+  const HomeView({super.key, this.onEditSortie});
 
   @override
-  State<SortieListPage> createState() => _SortieListPageState();
+  State<HomeView> createState() => _HomeViewState();
 }
 
-class _SortieListPageState extends State<SortieListPage> {
+class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

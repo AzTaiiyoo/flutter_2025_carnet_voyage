@@ -4,12 +4,12 @@ import 'package:flutter_2025_carnet_voyage/core/theme/app_shadows.dart';
 import 'package:flutter_2025_carnet_voyage/core/theme/app_spacing.dart';
 import '../../models/sortie.dart';
 
-/// Widget de marqueur personnalisé pour afficher une activité sur la carte
-class ActivityMarkerWidget extends StatelessWidget {
+/// Widget de marqueur personnalisé pour afficher une sortie sur la carte
+class SortieMarkerWidget extends StatelessWidget {
   final Sortie sortie;
   final VoidCallback? onTap;
 
-  const ActivityMarkerWidget({super.key, required this.sortie, this.onTap});
+  const SortieMarkerWidget({super.key, required this.sortie, this.onTap});
 
   @override
   Widget build(BuildContext context) {

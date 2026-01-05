@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_2025_carnet_voyage/ui/widget/activity_marker_widget.dart';
+import 'package:flutter_2025_carnet_voyage/ui/widget/sortie_marker_widget.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,9 +18,9 @@ import 'package:flutter_2025_carnet_voyage/ui/widget/address_info_widget.dart';
 import 'package:flutter_2025_carnet_voyage/models/sortie.dart';
 
 class MapView extends StatefulWidget {
-  final VoidCallback? onNavigateToAddActivity;
+  final VoidCallback? onNavigateToAddSortie;
 
-  const MapView({super.key, this.onNavigateToAddActivity});
+  const MapView({super.key, this.onNavigateToAddSortie});
 
   @override
   State<MapView> createState() => _MapViewState();
@@ -94,7 +94,7 @@ class _MapViewState extends State<MapView> {
                           ),
                           width: 150,
                           height: 80,
-                          child: ActivityMarkerWidget(
+                          child: SortieMarkerWidget(
                             sortie: sortie,
                             onTap: () => debugPrint("Tap sur ${sortie.name}"),
                           ),
@@ -179,10 +179,9 @@ class _MapViewState extends State<MapView> {
   }
 
   void _onValidateSelection(BuildContext context, MapState state) {
-    if (state.selectedAddress != null &&
-        widget.onNavigateToAddActivity != null) {
-      // Naviguer vers AddActivity via callback
-      widget.onNavigateToAddActivity!();
+    if (state.selectedAddress != null && widget.onNavigateToAddSortie != null) {
+      // Naviguer vers AddSortie via callback
+      widget.onNavigateToAddSortie!();
     }
   }
 }
