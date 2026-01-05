@@ -459,12 +459,18 @@ class _AddActivityState extends State<AddActivity> {
                   ElevatedButton.icon(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
+                        // BUG FIX: Récupérer les coordonnées depuis MapCubit
+                        final mapState = context.read<MapCubit>().state;
+
                         final Address address = Address(
                           street: _streetController.text.isNotEmpty
                               ? _streetController.text
                               : null,
                           city: _cityController.text,
                           postcode: _postcodeController.text,
+                          // Copier les coordonnées pour que les marqueurs s'affichent
+                          latitude: mapState.selectedAddress?.latitude,
+                          longitude: mapState.selectedAddress?.longitude,
                         );
 
                         final Sortie newSortie = Sortie(
@@ -479,6 +485,9 @@ class _AddActivityState extends State<AddActivity> {
                           imageUrl: _imagePath,
                         );
                         context.read<SortieCubit>().addSortie(newSortie);
+
+                        // BUG FIX: Réinitialiser le formulaire pour la prochaine activité
+                        _resetForm();
 
                         // Naviguer vers la liste via callback (IndexedStack, pas Navigator)
                         if (widget.onNavigateToList != null) {

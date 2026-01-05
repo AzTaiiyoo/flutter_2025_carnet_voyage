@@ -59,6 +59,24 @@ class _AddressSearchBarState extends State<AddressSearchBar> {
     setState(() {
       _showSuggestions = false;
     });
+
+    // Debug logging pour le Bug 1
+    print('Address selected: $address');
+    print('Has coordinates: ${address.hasCoordinates}');
+    print('Lat: ${address.latitude}, Lng: ${address.longitude}');
+
+    if (!address.hasCoordinates) {
+      // Afficher un message si pas de coordonnées
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Adresse sans coordonnées. Essayez d'entrer l'adresse complète.",
+          ),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+
     context.read<MapCubit>().selectAddress(address);
   }
 

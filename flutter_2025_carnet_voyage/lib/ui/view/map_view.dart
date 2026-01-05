@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_2025_carnet_voyage/ui/widget/activity_marker_widget.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 // custom imports
+
+//Cubit import
 import 'package:flutter_2025_carnet_voyage/blocs/map_cubit.dart';
+import 'package:flutter_2025_carnet_voyage/blocs/sortie_cubit.dart';
+
+// Widget import
 import 'package:flutter_2025_carnet_voyage/ui/widget/address_search_bar.dart';
 import 'package:flutter_2025_carnet_voyage/ui/widget/address_info_widget.dart';
+
+// /odels import
+import 'package:flutter_2025_carnet_voyage/models/sortie.dart';
 
 class MapView extends StatefulWidget {
   final VoidCallback? onNavigateToAddActivity;
@@ -23,6 +32,14 @@ class _MapViewState extends State<MapView> {
 
   @override
   Widget build(BuildContext context) {
+    // Création d'une liste de sorties utilisables sur la carte
+    final List<Sortie> sorties = context.watch<SortieCubit>().state;
+
+    // Filtrage des sorties pour ne garder que celles avec des coordonnées
+    final sortiesWithCoordinates = sorties
+        .where((sortie) => sortie.address.hasCoordinates)
+        .toList();
+
     return BlocConsumer<MapCubit, MapState>(
       listener: (context, state) {
         // Déplacer la carte vers la nouvelle position seulement si les coordonnées ont changé
@@ -66,7 +83,25 @@ class _MapViewState extends State<MapView> {
                         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                     subdomains: const ['a', 'b', 'c'],
                   ),
-                  // Marqueur pour la position sélectionnée
+                  // Marqueur pour les activités existantes (toujours visible)
+                  if (sortiesWithCoordinates.isNotEmpty)
+                    MarkerLayer(
+                      markers: sortiesWithCoordinates.map((sortie) {
+                        return Marker(
+                          point: LatLng(
+                            sortie.address.latitude!,
+                            sortie.address.longitude!,
+                          ),
+                          width: 150,
+                          height: 80,
+                          child: ActivityMarkerWidget(
+                            sortie: sortie,
+                            onTap: () => print("Tap sur ${sortie.name}"),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  // Marqueur pour la position sélectionnée (recherche/clic)
                   if (state.hasSelectedAddress &&
                       state.selectedAddress!.hasCoordinates)
                     MarkerLayer(
