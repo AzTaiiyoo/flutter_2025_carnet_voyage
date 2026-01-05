@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/sortie.dart';
+import 'photo_dialog.dart';
 
 class SortieCard extends StatelessWidget {
   final Sortie sortie;
@@ -32,18 +34,7 @@ class SortieCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      Icons.place,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      size: 28,
-                    ),
-                  ),
+                  _buildPhotoOrIcon(context),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -175,5 +166,57 @@ class SortieCard extends StatelessWidget {
       ),
     );
   }
-}
 
+  Widget _buildPhotoOrIcon(BuildContext context) {
+    if (sortie.imageUrl != null && sortie.imageUrl!.isNotEmpty) {
+      // Afficher la photo avec possibilité de cliquer pour agrandir
+      return GestureDetector(
+        onTap: () => PhotoDialog.show(context, sortie.imageUrl!),
+        child: Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(25),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.file(
+              File(sortie.imageUrl!),
+              width: 56,
+              height: 56,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                // Fallback si l'image ne peut pas être chargée
+                return _buildDefaultIcon(context);
+              },
+            ),
+          ),
+        ),
+      );
+    } else {
+      return _buildDefaultIcon(context);
+    }
+  }
+
+  Widget _buildDefaultIcon(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(
+        Icons.place,
+        color: Theme.of(context).colorScheme.onPrimaryContainer,
+        size: 28,
+      ),
+    );
+  }
+}

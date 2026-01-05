@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../models/address.dart';
 import '../../models/sortie.dart';
@@ -27,6 +29,8 @@ class _AddActivityState extends State<AddActivity> {
 
   DateTime _selectedDate = DateTime.now();
   double _rating = 0;
+  String? _imagePath;
+  final ImagePicker _picker = ImagePicker();
 
   final GlobalKey<FormState> _formKey = GlobalKey();
 
@@ -84,172 +88,193 @@ class _AddActivityState extends State<AddActivity> {
     }
   }
 
+  Future<void> _pickImageFromGallery() async {
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1200,
+      maxHeight: 1200,
+      imageQuality: 85,
+    );
+    if (image != null) {
+      setState(() {
+        _imagePath = image.path;
+      });
+    }
+  }
+
+  Future<void> _pickImageFromCamera() async {
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.camera,
+      maxWidth: 1200,
+      maxHeight: 1200,
+      imageQuality: 85,
+    );
+    if (image != null) {
+      setState(() {
+        _imagePath = image.path;
+      });
+    }
+  }
+
+  void _removeImage() {
+    setState(() {
+      _imagePath = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocListener<MapCubit, MapState>(
-      listener: (context, state) {
-        // Mettre à jour les champs quand une adresse est sélectionnée
-        if (state.hasSelectedAddress) {
-          final Address address = state.selectedAddress!;
-          setState(() {
-            _streetController.text = address.street ?? '';
-            _cityController.text = address.city;
-            _postcodeController.text = address.postcode;
-          });
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Ajouter une sortie'),
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        ),
-        body: SingleChildScrollView(
-          child: Container(
-            margin: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  // Nom de l'activité
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.label, color: Colors.grey[600]),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Nom',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _nameController,
-                            decoration: const InputDecoration(
-                              labelText: 'Nom de la sortie',
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Veuillez entrer le nom de la sortie';
-                              }
-                              return null;
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Section Adresse
-                  Card(
-                    child: InkWell(
-                      onTap: _navigateToMap,
-                      borderRadius: BorderRadius.circular(12),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Ajouter une sortie'),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+      ),
+      body: SingleChildScrollView(
+        child: Container(
+          margin: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                // Nom de l'activité
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.location_on,
-                                  color: Colors.grey[600],
-                                ),
-                                const SizedBox(width: 8),
-                                const Text(
-                                  'Adresse',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const Spacer(),
-                                Icon(
-                                  Icons.map,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Choisir sur la carte',
-                                  style: TextStyle(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            TextFormField(
-                              controller: _streetController,
-                              decoration: const InputDecoration(
-                                labelText: 'Rue (optionnel)',
-                                border: OutlineInputBorder(),
+                            Icon(Icons.label, color: Colors.grey[600]),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'Nom',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
-                              enabled: false,
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  flex: 2,
-                                  child: TextFormField(
-                                    controller: _cityController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Ville',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    enabled: false,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Ville requise';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _postcodeController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Code postal',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    enabled: false,
-                                    keyboardType: TextInputType.number,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Requis';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
                             ),
                           ],
                         ),
-                      ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Nom de la sortie',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Veuillez entrer le nom de la sortie';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
+                ),
+                const SizedBox(height: 12),
 
-                  // Date
-                  Card(
+                // Section Photo
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.photo_camera, color: Colors.grey[600]),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'Photo (optionnel)',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        if (_imagePath != null) ...[
+                          // Aperçu de l'image
+                          Stack(
+                            alignment: Alignment.topRight,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  File(_imagePath!),
+                                  height: 200,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: GestureDetector(
+                                  onTap: _removeImage,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.withAlpha(200),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: _pickImageFromGallery,
+                                icon: const Icon(Icons.photo_library),
+                                label: const Text('Galerie'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: _pickImageFromCamera,
+                                icon: const Icon(Icons.camera_alt),
+                                label: const Text('Appareil'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Section Adresse
+                Card(
+                  child: InkWell(
+                    onTap: _navigateToMap,
+                    borderRadius: BorderRadius.circular(12),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -257,185 +282,263 @@ class _AddActivityState extends State<AddActivity> {
                         children: [
                           Row(
                             children: [
+                              Icon(Icons.location_on, color: Colors.grey[600]),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Adresse',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Spacer(),
                               Icon(
-                                Icons.calendar_today,
-                                color: Colors.grey[600],
+                                Icons.map,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Date',
+                              const SizedBox(width: 4),
+                              Text(
+                                'Choisir sur la carte',
                                 style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontSize: 12,
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
-                            controller: _dateController,
-                            readOnly: true,
-                            onTap: () => _selectDate(context),
+                            controller: _streetController,
                             decoration: const InputDecoration(
-                              labelText: 'Date de la sortie',
+                              labelText: 'Rue (optionnel)',
                               border: OutlineInputBorder(),
-                              suffixIcon: Icon(Icons.arrow_drop_down),
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Veuillez sélectionner une date';
-                              }
-                              return null;
-                            },
+                            enabled: false,
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Note / Commentaire
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                          const SizedBox(height: 12),
                           Row(
                             children: [
-                              Icon(Icons.notes, color: Colors.grey[600]),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Notes',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                              Expanded(
+                                flex: 2,
+                                child: TextFormField(
+                                  controller: _cityController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Ville',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  enabled: false,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Ville requise';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _postcodeController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Code postal',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  enabled: false,
+                                  keyboardType: TextInputType.number,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Requis';
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _noteController,
-                            maxLines: 3,
-                            decoration: const InputDecoration(
-                              labelText: 'Commentaires (optionnel)',
-                              border: OutlineInputBorder(),
-                              alignLabelWithHint: true,
-                            ),
-                          ),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                ),
+                const SizedBox(height: 12),
 
-                  // Rating
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.star, color: Colors.grey[600]),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Note',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(5, (index) {
-                              return IconButton(
-                                icon: Icon(
-                                  index < _rating
-                                      ? Icons.star
-                                      : Icons.star_border,
-                                  color: Colors.amber,
-                                  size: 36,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _rating = index + 1.0;
-                                  });
-                                },
-                              );
-                            }),
-                          ),
-                          if (_rating > 0)
-                            Center(
-                              child: TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _rating = 0;
-                                  });
-                                },
-                                child: const Text('Effacer la note'),
+                // Date
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.calendar_today, color: Colors.grey[600]),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'Date',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Bouton Ajouter
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        final Address address = Address(
-                          street: _streetController.text.isNotEmpty
-                              ? _streetController.text
-                              : null,
-                          city: _cityController.text,
-                          postcode: _postcodeController.text,
-                        );
-
-                        final Sortie newSortie = Sortie(
-                          id: DateTime.now().millisecondsSinceEpoch.toString(),
-                          name: _nameController.text,
-                          address: address,
-                          date: _selectedDate,
-                          note: _noteController.text.isNotEmpty
-                              ? _noteController.text
-                              : null,
-                          rating: _rating > 0 ? _rating : null,
-                          imageUrl: null,
-                        );
-                        context.read<SortieCubit>().addSortie(newSortie);
-
-                        // Nettoyer les champs
-                        _resetForm();
-
-                        // Revenir à la liste
-                        if (widget.onNavigateToList != null) {
-                          widget.onNavigateToList!();
-                        }
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Sortie ajoutée avec succès !'),
-                            backgroundColor: Colors.green,
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _dateController,
+                          readOnly: true,
+                          onTap: () => _selectDate(context),
+                          decoration: const InputDecoration(
+                            labelText: 'Date de la sortie',
+                            border: OutlineInputBorder(),
+                            suffixIcon: Icon(Icons.arrow_drop_down),
                           ),
-                        );
-                      }
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text('Ajouter la sortie'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Veuillez sélectionner une date';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 12),
+
+                // Note / Commentaire
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.notes, color: Colors.grey[600]),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'Notes',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _noteController,
+                          maxLines: 3,
+                          decoration: const InputDecoration(
+                            labelText: 'Commentaires (optionnel)',
+                            border: OutlineInputBorder(),
+                            alignLabelWithHint: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Rating
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.star, color: Colors.grey[600]),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'Note',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(5, (index) {
+                            return IconButton(
+                              icon: Icon(
+                                index < _rating
+                                    ? Icons.star
+                                    : Icons.star_border,
+                                color: Colors.amber,
+                                size: 36,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _rating = index + 1.0;
+                                });
+                              },
+                            );
+                          }),
+                        ),
+                        if (_rating > 0)
+                          Center(
+                            child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _rating = 0;
+                                });
+                              },
+                              child: const Text('Effacer la note'),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Bouton Ajouter
+                ElevatedButton.icon(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      final Address address = Address(
+                        street: _streetController.text.isNotEmpty
+                            ? _streetController.text
+                            : null,
+                        city: _cityController.text,
+                        postcode: _postcodeController.text,
+                      );
+
+                      final Sortie newSortie = Sortie(
+                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                        name: _nameController.text,
+                        address: address,
+                        date: _selectedDate,
+                        note: _noteController.text.isNotEmpty
+                            ? _noteController.text
+                            : null,
+                        rating: _rating > 0 ? _rating : null,
+                        imageUrl: _imagePath,
+                      );
+                      context.read<SortieCubit>().addSortie(newSortie);
+                      Navigator.of(context).pop();
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Sortie ajoutée avec succès !'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Ajouter la sortie'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
