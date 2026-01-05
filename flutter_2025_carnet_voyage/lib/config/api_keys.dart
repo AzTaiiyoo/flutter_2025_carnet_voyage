@@ -8,7 +8,7 @@ library;
 class ApiKeys {
   /// Clé API OpenWeatherMap
   /// Créez un compte gratuit sur https://openweathermap.org/api
-  static const String openWeatherMapApiKey = 'b1963ad119d568870abb6408c6331453';
+  static const String openWeatherMapApiKey = 'YOUR_API_KEY_HERE';
 
   /// Base URL de l'API OpenWeatherMap
   static const String openWeatherMapBaseUrl =
