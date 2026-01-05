@@ -1,75 +1,61 @@
 import 'package:flutter/material.dart';
 
-/// Palette de couleurs centralisée inspirée de la nature
-/// Utilisation: AppColors.slateBlue, AppColors.light.surface, etc.
+/// Palette de couleurs centralisée avec approches sémantique
+/// Permet de changer de palette sans renommer les variables dans tout le code
 abstract class AppColors {
   // ============================================
-  // PALETTE NATURE PRINCIPALE
+  // PALETTE DE RÉFÉRENCE (LITTÉRALE)
+  // On définit ici les couleurs "physiques"
   // ============================================
 
-  /// Bleu ardoise - Couleur primaire sophistiquée
-  static const Color slateBlue = Color(0xFF64748B);
-  static const Color slateBlueLight = Color(0xFF94A3B8);
-  static const Color slateBlueDark = Color(0xFF475569);
+  // Bleus (L'eau)
+  static const Color oceanBlue = Color(0xFF005F73);
+  static const Color oceanBlueLight = Color(0xFF0A9396);
+  static const Color oceanBlueDark = Color(0xFF001219);
 
-  /// Vert sauge - Accent nature, succès
-  static const Color sageGreen = Color(0xFF84A98C);
-  static const Color sageGreenLight = Color(0xFFA7C4AD);
-  static const Color sageGreenDark = Color(0xFF52796F);
+  // Verts (La montagne)
+  static const Color forestGreen = Color(0xFF1B4332);
+  static const Color forestGreenLight = Color(0xFF2D6A4F);
+  static const Color forestGreenDark = Color(0xFF081C15);
 
-  /// Beige sable - Surfaces chaudes
-  static const Color sandBeige = Color(0xFFE8DCC4);
-  static const Color sandBeigeLight = Color(0xFFF5F0E6);
-  static const Color sandBeigeDark = Color(0xFFD4C4A8);
+  // Gris/Mousse (Surfaces)
+  static const Color mistGrey = Color(0xFFEDF2F4);
+  static const Color mistGreyLight = Color(0xFFF8FAFC);
+  static const Color mistGreyDark = Color(0xFF8D99AE);
 
-  /// Blanc chaud - Arrière-plan principal
-  static const Color warmWhite = Color(0xFFFAF8F5);
-  static const Color warmWhiteDark = Color(0xFF1A1A18);
-
-  /// Ardoise profond - Texte principal
-  static const Color deepSlate = Color(0xFF334155);
-  static const Color deepSlateLight = Color(0xFFE2E8F0);
+  // Accents & Sémantique
+  static const Color mountainGold = Color(0xFFEE9B00); // Pour les notes
+  static const Color terraCotta = Color(0xFFBC6C5C); // Pour les erreurs
 
   // ============================================
-  // COULEURS SÉMANTIQUES
+  // JETONS SÉMANTIQUES (L'USAGE)
+  // C'est ce que les thèmes utilisent
   // ============================================
 
-  /// Succès
-  static const Color success = Color(0xFF84A98C);
-  static const Color successLight = Color(0xFFD1E7D4);
+  static const Color brandPrimary = oceanBlue;
+  static const Color brandPrimaryVariant = oceanBlueLight;
 
-  /// Avertissement (ambre doré naturel)
-  static const Color warning = Color(0xFFD4A574);
-  static const Color warningLight = Color(0xFFFAE8D4);
+  static const Color brandSecondary = forestGreen;
+  static const Color brandSecondaryVariant = forestGreenLight;
 
-  /// Erreur (terre cuite)
-  static const Color error = Color(0xFFBC6C5C);
-  static const Color errorLight = Color(0xFFF8E4E0);
+  static const Color surfaceAccent = mistGrey;
+  static const Color surfaceAccentVariant = mistGreyLight;
 
-  /// Information
-  static const Color info = Color(0xFF64748B);
-  static const Color infoLight = Color(0xFFE0E5EB);
+  static const Color backgroundLight = Color(0xFFF8FAFC);
+  static const Color backgroundDark = Color(0xFF0F172A);
 
   // ============================================
   // COULEURS POUR LES PHOTOS VIBRANTES
   // ============================================
 
-  /// Overlay pour faire ressortir les photos
   static const Color photoOverlay = Color(0x0A000000);
-
-  /// Bordure subtile pour les photos
   static const Color photoBorder = Color(0x1A000000);
 
   // ============================================
-  // LIGHT THEME COLORS
+  // ACCÈS AUX THÈMES
   // ============================================
 
   static const LightColors light = LightColors();
-
-  // ============================================
-  // DARK THEME COLORS
-  // ============================================
-
   static const DarkColors dark = DarkColors();
 }
 
@@ -78,30 +64,31 @@ class LightColors {
   const LightColors();
 
   // Surfaces
-  Color get background => AppColors.warmWhite;
+  Color get background => AppColors.backgroundLight;
   Color get surface => Colors.white;
-  Color get surfaceVariant => AppColors.sandBeigeLight;
+  Color get surfaceVariant => AppColors.surfaceAccentVariant;
 
   // Primary
-  Color get primary => AppColors.slateBlue;
-  Color get primaryContainer => AppColors.sandBeige;
+  Color get primary => AppColors.brandPrimary;
+  Color get primaryContainer => AppColors.surfaceAccent;
   Color get onPrimary => Colors.white;
-  Color get onPrimaryContainer => AppColors.deepSlate;
+  Color get onPrimaryContainer => AppColors.brandPrimary;
 
   // Secondary
-  Color get secondary => AppColors.sageGreen;
-  Color get secondaryContainer => AppColors.sageGreenLight;
+  Color get secondary => AppColors.brandSecondary;
+  Color get secondaryContainer =>
+      AppColors.brandSecondaryVariant.withOpacity(0.1);
   Color get onSecondary => Colors.white;
-  Color get onSecondaryContainer => AppColors.sageGreenDark;
+  Color get onSecondaryContainer => AppColors.brandSecondary;
 
   // Tertiary
-  Color get tertiary => AppColors.warning;
-  Color get tertiaryContainer => AppColors.warningLight;
+  Color get tertiary => AppColors.mountainGold;
+  Color get tertiaryContainer => AppColors.mountainGold.withOpacity(0.1);
 
   // Text
-  Color get textPrimary => AppColors.deepSlate;
-  Color get textSecondary => AppColors.slateBlue;
-  Color get textTertiary => AppColors.slateBlueLight;
+  Color get textPrimary => const Color(0xFF1E293B);
+  Color get textSecondary => AppColors.brandPrimary;
+  Color get textTertiary => const Color(0xFF64748B);
   Color get textOnDark => Colors.white;
 
   // Borders & Dividers
@@ -110,8 +97,8 @@ class LightColors {
 
   // States
   Color get disabled => const Color(0xFFCBD5E1);
-  Color get error => AppColors.error;
-  Color get success => AppColors.success;
+  Color get error => AppColors.terraCotta;
+  Color get success => AppColors.forestGreen;
 }
 
 /// Couleurs pour le thème sombre
@@ -119,38 +106,38 @@ class DarkColors {
   const DarkColors();
 
   // Surfaces
-  Color get background => AppColors.warmWhiteDark;
-  Color get surface => const Color(0xFF262624);
-  Color get surfaceVariant => const Color(0xFF3A3A36);
+  Color get background => AppColors.backgroundDark;
+  Color get surface => const Color(0xFF1E293B);
+  Color get surfaceVariant => const Color(0xFF334155);
 
   // Primary
-  Color get primary => AppColors.slateBlueLight;
-  Color get primaryContainer => AppColors.slateBlueDark;
-  Color get onPrimary => AppColors.deepSlate;
-  Color get onPrimaryContainer => AppColors.deepSlateLight;
+  Color get primary => AppColors.brandPrimaryVariant;
+  Color get primaryContainer => const Color(0xFF001219);
+  Color get onPrimary => Colors.white;
+  Color get onPrimaryContainer => AppColors.brandPrimaryVariant;
 
   // Secondary
-  Color get secondary => AppColors.sageGreenLight;
-  Color get secondaryContainer => AppColors.sageGreenDark;
-  Color get onSecondary => AppColors.deepSlate;
-  Color get onSecondaryContainer => AppColors.sageGreenLight;
+  Color get secondary => AppColors.brandSecondaryVariant;
+  Color get secondaryContainer => AppColors.forestGreenDark;
+  Color get onSecondary => Colors.white;
+  Color get onSecondaryContainer => AppColors.brandSecondaryVariant;
 
   // Tertiary
-  Color get tertiary => AppColors.warning;
+  Color get tertiary => AppColors.mountainGold;
   Color get tertiaryContainer => const Color(0xFF5C4A3A);
 
   // Text
-  Color get textPrimary => AppColors.deepSlateLight;
-  Color get textSecondary => AppColors.slateBlueLight;
-  Color get textTertiary => AppColors.slateBlue;
-  Color get textOnDark => AppColors.deepSlate;
+  Color get textPrimary => const Color(0xFFF1F5F9);
+  Color get textSecondary => AppColors.brandPrimaryVariant;
+  Color get textTertiary => const Color(0xFF94A3B8);
+  Color get textOnDark => const Color(0xFF0F172A);
 
   // Borders & Dividers
-  Color get border => const Color(0xFF4A4A46);
-  Color get divider => const Color(0xFF3A3A36);
+  Color get border => const Color(0xFF334155);
+  Color get divider => const Color(0xFF1E293B);
 
   // States
-  Color get disabled => const Color(0xFF64645E);
-  Color get error => AppColors.error;
-  Color get success => AppColors.sageGreenLight;
+  Color get disabled => const Color(0xFF475569);
+  Color get error => AppColors.terraCotta;
+  Color get success => AppColors.forestGreenLight;
 }

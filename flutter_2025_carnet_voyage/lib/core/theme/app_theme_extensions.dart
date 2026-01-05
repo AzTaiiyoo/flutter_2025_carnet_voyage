@@ -66,9 +66,9 @@ class LifeLogThemeExtension extends ThemeExtension<LifeLogThemeExtension> {
       boxShadow: AppShadows.photo,
     ),
     ratingBadgeDecoration: BoxDecoration(
-      color: AppColors.warningLight,
+      color: AppColors.mountainGold.withOpacity(0.1),
       borderRadius: AppSpacing.buttonRadius,
-      border: Border.all(color: AppColors.warning, width: 1),
+      border: Border.all(color: AppColors.mountainGold, width: 1),
     ),
     searchBarDecoration: BoxDecoration(
       color: Colors.white,
@@ -76,12 +76,12 @@ class LifeLogThemeExtension extends ThemeExtension<LifeLogThemeExtension> {
       boxShadow: AppShadows.searchBar,
     ),
     noteContainerDecoration: BoxDecoration(
-      color: AppColors.sandBeigeLight,
+      color: AppColors.surfaceAccentVariant,
       borderRadius: AppSpacing.buttonRadius,
     ),
-    iconColor: AppColors.slateBlue,
-    iconColorSecondary: AppColors.slateBlueLight,
-    ratingStarColor: AppColors.warning,
+    iconColor: AppColors.brandPrimary,
+    iconColorSecondary: AppColors.brandPrimaryVariant,
+    ratingStarColor: AppColors.mountainGold,
     ratingTextColor: const Color(0xFF8B6914),
   );
 
@@ -102,9 +102,9 @@ class LifeLogThemeExtension extends ThemeExtension<LifeLogThemeExtension> {
       boxShadow: AppShadows.softDark,
     ),
     ratingBadgeDecoration: BoxDecoration(
-      color: const Color(0xFF4A3D2A),
+      color: AppColors.mountainGold.withOpacity(0.2),
       borderRadius: AppSpacing.buttonRadius,
-      border: Border.all(color: AppColors.warning, width: 1),
+      border: Border.all(color: AppColors.mountainGold, width: 1),
     ),
     searchBarDecoration: BoxDecoration(
       color: AppColors.dark.surface,
@@ -115,10 +115,10 @@ class LifeLogThemeExtension extends ThemeExtension<LifeLogThemeExtension> {
       color: AppColors.dark.surfaceVariant,
       borderRadius: AppSpacing.buttonRadius,
     ),
-    iconColor: AppColors.slateBlueLight,
-    iconColorSecondary: AppColors.slateBlue,
-    ratingStarColor: AppColors.warning,
-    ratingTextColor: AppColors.warningLight,
+    iconColor: AppColors.brandPrimaryVariant,
+    iconColorSecondary: AppColors.brandPrimary,
+    ratingStarColor: AppColors.mountainGold,
+    ratingTextColor: AppColors.mountainGold,
   );
 
   @override

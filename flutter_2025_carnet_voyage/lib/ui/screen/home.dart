@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_2025_carnet_voyage/ui/screen/add_activity.dart';
 import 'package:flutter_2025_carnet_voyage/ui/view/map_view.dart';
+import 'package:flutter_2025_carnet_voyage/blocs/theme_cubit.dart';
 import '../view/list.dart';
 
 /// Écran principal avec navigation bottom bar
@@ -51,6 +53,7 @@ class _HomeState extends State<Home> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -71,6 +74,13 @@ class _HomeState extends State<Home> {
               )
             : null,
         actions: [
+          IconButton(
+            icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            tooltip: isDarkMode ? 'Mode clair' : 'Mode sombre',
+            onPressed: () {
+              context.read<ThemeCubit>().toggleTheme();
+            },
+          ),
           if (currentPageIndex == 0)
             IconButton(
               icon: const Icon(Icons.add),
