@@ -12,8 +12,16 @@ import '../../blocs/map_cubit.dart';
 class AddActivity extends StatefulWidget {
   final VoidCallback? onNavigateToMap;
   final VoidCallback? onNavigateToList;
+  final Sortie? sortieToEdit;
 
-  const AddActivity({super.key, this.onNavigateToMap, this.onNavigateToList});
+  const AddActivity({
+    super.key,
+    this.onNavigateToMap,
+    this.onNavigateToList,
+    this.sortieToEdit,
+  });
+
+  bool get isEditing => sortieToEdit != null;
 
   @override
   State<AddActivity> createState() => _AddActivityState();
@@ -37,20 +45,57 @@ class _AddActivityState extends State<AddActivity> {
   @override
   void initState() {
     super.initState();
+    _initializeForm();
+  }
+
+  @override
+  void didUpdateWidget(AddActivity oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Réinitialiser le formulaire si sortieToEdit a changé
+    if (widget.sortieToEdit != oldWidget.sortieToEdit) {
+      _initializeForm();
+    }
+  }
+
+  void _initializeForm() {
+    if (widget.sortieToEdit != null) {
+      final sortie = widget.sortieToEdit!;
+      _nameController.text = sortie.name;
+      _streetController.text = sortie.address.street ?? '';
+      _cityController.text = sortie.address.city;
+      _postcodeController.text = sortie.address.postcode;
+      _noteController.text = sortie.note ?? '';
+      _selectedDate = sortie.date;
+      _rating = sortie.rating ?? 0;
+      _imagePath = sortie.imageUrl;
+    } else {
+      // Mode ajout : réinitialiser tous les champs
+      _nameController.clear();
+      _streetController.clear();
+      _cityController.clear();
+      _postcodeController.clear();
+      _noteController.clear();
+      _selectedDate = DateTime.now();
+      _rating = 0;
+      _imagePath = null;
+    }
     _dateController.text = DateFormat('dd/MM/yyyy').format(_selectedDate);
   }
+
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // Récupérer l'adresse depuis le MapCubit si elle existe
-    final mapState = context.read<MapCubit>().state;
-    if (mapState.hasSelectedAddress) {
-      final Address address = mapState.selectedAddress!;
-      _streetController.text = address.street ?? '';
-      _cityController.text = address.city;
-      _postcodeController.text = address.postcode;
+    // Récupérer l'adresse depuis le MapCubit si elle existe (seulement en mode ajout)
+    if (!widget.isEditing) {
+      final mapState = context.read<MapCubit>().state;
+      if (mapState.hasSelectedAddress) {
+        final Address address = mapState.selectedAddress!;
+        _streetController.text = address.street ?? '';
+        _cityController.text = address.city;
+        _postcodeController.text = address.postcode;
+      }
     }
   }
 
@@ -138,7 +183,7 @@ class _AddActivityState extends State<AddActivity> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Ajouter une sortie'),
+          title: Text(widget.isEditing ? 'Modifier la sortie' : 'Ajouter une sortie'),
           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         ),
         body: SingleChildScrollView(
@@ -518,7 +563,7 @@ class _AddActivityState extends State<AddActivity> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Bouton Ajouter
+                  // Bouton Ajouter/Modifier
                   ElevatedButton.icon(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
@@ -530,8 +575,10 @@ class _AddActivityState extends State<AddActivity> {
                           postcode: _postcodeController.text,
                         );
 
-                        final Sortie newSortie = Sortie(
-                          id: DateTime.now().millisecondsSinceEpoch.toString(),
+                        final Sortie sortie = Sortie(
+                          id: widget.isEditing
+                              ? widget.sortieToEdit!.id
+                              : DateTime.now().millisecondsSinceEpoch.toString(),
                           name: _nameController.text,
                           address: address,
                           date: _selectedDate,
@@ -541,7 +588,15 @@ class _AddActivityState extends State<AddActivity> {
                           rating: _rating > 0 ? _rating : null,
                           imageUrl: _imagePath,
                         );
-                        context.read<SortieCubit>().addSortie(newSortie);
+
+                        if (widget.isEditing) {
+                          context.read<SortieCubit>().updateSortie(
+                            widget.sortieToEdit!.id,
+                            sortie,
+                          );
+                        } else {
+                          context.read<SortieCubit>().addSortie(sortie);
+                        }
 
                         // Naviguer vers la liste via callback (IndexedStack, pas Navigator)
                         if (widget.onNavigateToList != null) {
@@ -549,15 +604,17 @@ class _AddActivityState extends State<AddActivity> {
                         }
 
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Sortie ajoutée avec succès !'),
+                          SnackBar(
+                            content: Text(widget.isEditing
+                                ? 'Sortie modifiée avec succès !'
+                                : 'Sortie ajoutée avec succès !'),
                             backgroundColor: Colors.green,
                           ),
                         );
                       }
                     },
-                    icon: const Icon(Icons.add),
-                    label: const Text('Ajouter la sortie'),
+                    icon: Icon(widget.isEditing ? Icons.save : Icons.add),
+                    label: Text(widget.isEditing ? 'Enregistrer' : 'Ajouter la sortie'),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
@@ -570,18 +627,5 @@ class _AddActivityState extends State<AddActivity> {
       ),
     );
   }
-
-  void _resetForm() {
-    setState(() {
-      _nameController.clear();
-      _streetController.clear();
-      _cityController.clear();
-      _postcodeController.clear();
-      _noteController.clear();
-      _selectedDate = DateTime.now();
-      _dateController.text = DateFormat('dd/MM/yyyy').format(_selectedDate);
-      _rating = 0;
-    });
-    context.read<MapCubit>().clearSelection();
-  }
 }
+

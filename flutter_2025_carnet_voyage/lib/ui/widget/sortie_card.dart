@@ -7,12 +7,42 @@ import 'photo_dialog.dart';
 class SortieCard extends StatelessWidget {
   final Sortie sortie;
   final VoidCallback? onTap;
+  final VoidCallback? onDelete;
 
   const SortieCard({
     super.key,
     required this.sortie,
     this.onTap,
+    this.onDelete,
   });
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          title: const Text('Supprimer la sortie'),
+          content: Text('Voulez-vous vraiment supprimer "${sortie.name}" ?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                if (onDelete != null) {
+                  onDelete!();
+                }
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Supprimer'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,6 +135,12 @@ class SortieCard extends StatelessWidget {
                         ],
                       ),
                     ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: Icon(Icons.delete_outline, color: Colors.red[400]),
+                    onPressed: () => _showDeleteConfirmation(context),
+                    tooltip: 'Supprimer',
+                  ),
                 ],
               ),
               const SizedBox(height: 12),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_2025_carnet_voyage/ui/screen/add_activity.dart';
 import 'package:flutter_2025_carnet_voyage/ui/view/map_view.dart';
+import '../../models/sortie.dart';
 import '../view/list.dart';
 
 class Home extends StatefulWidget {
@@ -12,44 +13,66 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int currentPageIndex = 0;
+  Sortie? _sortieToEdit;
 
   void _navigateToAddActivity() {
     setState(() {
+      _sortieToEdit = null;
+      currentPageIndex = 2; // Index de AddActivity
+    });
+  }
+
+  void _navigateToEditActivity(Sortie sortie) {
+    setState(() {
+      _sortieToEdit = sortie;
       currentPageIndex = 2; // Index de AddActivity
     });
   }
 
   void _navigateToMap() {
     setState(() {
+      // Ne pas effacer _sortieToEdit pour conserver les données en mode édition
       currentPageIndex = 1; // Index de MapView
+    });
+  }
+
+  void _navigateBackToForm() {
+    // Retour au formulaire en préservant _sortieToEdit (utilisé depuis la carte)
+    setState(() {
+      currentPageIndex = 2; // Index de AddActivity
     });
   }
 
   void _navigateToList() {
     setState(() {
+      _sortieToEdit = null;
       currentPageIndex = 0; // Index de SortieListPage
     });
   }
 
-  // Liste des vues (écrans)
-  late final List<Widget> _views = [
-    const SortieListPage(),
-    MapView(onNavigateToAddActivity: _navigateToAddActivity),
-    AddActivity(
-      onNavigateToMap: _navigateToMap,
-      onNavigateToList: _navigateToList,
-    ),
-  ];
-
-  // Titres correspondants
-  final List<String> _titles = ['Mes Sorties', 'Carte', 'Ajouter une sortie'];
-
   @override
   Widget build(BuildContext context) {
+    // Liste des vues (écrans) - recréée à chaque build pour avoir la bonne sortie
+    final List<Widget> views = [
+      SortieListPage(onEditSortie: _navigateToEditActivity),
+      MapView(onNavigateToAddActivity: _navigateBackToForm),
+      AddActivity(
+        onNavigateToMap: _navigateToMap,
+        onNavigateToList: _navigateToList,
+        sortieToEdit: _sortieToEdit,
+      ),
+    ];
+
+
+    // Titres correspondants
+    final String title = currentPageIndex == 2
+        ? (_sortieToEdit != null ? 'Modifier la sortie' : 'Ajouter une sortie')
+        : (currentPageIndex == 1 ? 'Carte' : 'Mes Sorties');
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _titles[currentPageIndex],
+          title,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
@@ -59,6 +82,7 @@ class _HomeState extends State<Home> {
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () {
                   setState(() {
+                    _sortieToEdit = null;
                     currentPageIndex = 0; // Retour à la liste
                   });
                 },
@@ -76,6 +100,7 @@ class _HomeState extends State<Home> {
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
           setState(() {
+            _sortieToEdit = null;
             currentPageIndex = index;
           });
         },
@@ -94,7 +119,8 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
-      body: IndexedStack(index: currentPageIndex, children: _views),
+      body: IndexedStack(index: currentPageIndex, children: views),
     );
   }
 }
+
