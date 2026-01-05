@@ -136,7 +136,10 @@ class SortieCard extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: AppSpacing.ms),
-                Divider(height: 1, color: colorScheme.outline.withOpacity(0.3)),
+                Divider(
+                  height: 1,
+                  color: colorScheme.outline.withValues(alpha: 0.3),
+                ),
                 SizedBox(height: AppSpacing.ms),
                 Row(
                   children: [

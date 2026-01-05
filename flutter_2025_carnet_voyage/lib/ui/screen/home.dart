@@ -72,14 +72,14 @@ class _HomeState extends State<Home> {
     ];
 
     // Titres correspondants
-    final String _titles = currentPageIndex == 2
+    final String title = currentPageIndex == 2
         ? (_sortieToEdit != null ? 'Modifier la sortie' : 'Ajouter une sortie')
         : (currentPageIndex == 1 ? 'Carte' : 'Mes Sorties');
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _titles,
+          title,
           style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         backgroundColor: colorScheme.primaryContainer,

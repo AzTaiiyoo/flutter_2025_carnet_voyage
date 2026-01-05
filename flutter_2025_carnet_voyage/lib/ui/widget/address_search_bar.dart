@@ -61,9 +61,9 @@ class _AddressSearchBarState extends State<AddressSearchBar> {
     });
 
     // Debug logging pour le Bug 1
-    print('Address selected: $address');
-    print('Has coordinates: ${address.hasCoordinates}');
-    print('Lat: ${address.latitude}, Lng: ${address.longitude}');
+    debugPrint('Address selected: $address');
+    debugPrint('Has coordinates: ${address.hasCoordinates}');
+    debugPrint('Lat: ${address.latitude}, Lng: ${address.longitude}');
 
     if (!address.hasCoordinates) {
       // Afficher un message si pas de coordonnées

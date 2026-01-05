@@ -33,20 +33,20 @@ class _SortieListPageState extends State<SortieListPage> {
                 Icon(
                   Icons.travel_explore,
                   size: AppSpacing.avatarXl,
-                  color: colorScheme.outline.withOpacity(0.5),
+                  color: colorScheme.outline.withValues(alpha: 0.5),
                 ),
                 SizedBox(height: AppSpacing.md),
                 Text(
                   'Aucune sortie enregistrée',
                   style: textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.7),
+                    color: colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
                 SizedBox(height: AppSpacing.sm),
                 Text(
                   'Appuyez sur + pour ajouter une sortie',
                   style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.5),
+                    color: colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
               ],
@@ -76,4 +76,3 @@ class _SortieListPageState extends State<SortieListPage> {
     );
   }
 }
-

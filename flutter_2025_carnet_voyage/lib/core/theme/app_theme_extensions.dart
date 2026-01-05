@@ -4,7 +4,7 @@ import 'app_shadows.dart';
 import 'app_spacing.dart';
 
 /// Extensions de thème personnalisées pour les composants Life-log
-/// Utilisation: Theme.of(context).extension<LifeLogThemeExtension>()!
+/// Utilisation: `Theme.of(context).extension<LifeLogThemeExtension>()!`
 class LifeLogThemeExtension extends ThemeExtension<LifeLogThemeExtension> {
   const LifeLogThemeExtension({
     required this.cardDecoration,
@@ -66,7 +66,7 @@ class LifeLogThemeExtension extends ThemeExtension<LifeLogThemeExtension> {
       boxShadow: AppShadows.photo,
     ),
     ratingBadgeDecoration: BoxDecoration(
-      color: AppColors.mountainGold.withOpacity(0.1),
+      color: AppColors.mountainGold.withValues(alpha: 0.1),
       borderRadius: AppSpacing.buttonRadius,
       border: Border.all(color: AppColors.mountainGold, width: 1),
     ),
@@ -102,7 +102,7 @@ class LifeLogThemeExtension extends ThemeExtension<LifeLogThemeExtension> {
       boxShadow: AppShadows.softDark,
     ),
     ratingBadgeDecoration: BoxDecoration(
-      color: AppColors.mountainGold.withOpacity(0.2),
+      color: AppColors.mountainGold.withValues(alpha: 0.2),
       borderRadius: AppSpacing.buttonRadius,
       border: Border.all(color: AppColors.mountainGold, width: 1),
     ),

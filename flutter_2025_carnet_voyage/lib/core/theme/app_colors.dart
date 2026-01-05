@@ -77,13 +77,13 @@ class LightColors {
   // Secondary
   Color get secondary => AppColors.brandSecondary;
   Color get secondaryContainer =>
-      AppColors.brandSecondaryVariant.withOpacity(0.1);
+      AppColors.brandSecondaryVariant.withValues(alpha: 0.1);
   Color get onSecondary => Colors.white;
   Color get onSecondaryContainer => AppColors.brandSecondary;
 
   // Tertiary
   Color get tertiary => AppColors.mountainGold;
-  Color get tertiaryContainer => AppColors.mountainGold.withOpacity(0.1);
+  Color get tertiaryContainer => AppColors.mountainGold.withValues(alpha: 0.1);
 
   // Text
   Color get textPrimary => const Color(0xFF1E293B);

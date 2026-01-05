@@ -269,7 +269,9 @@ class _AddActivityState extends State<AddActivity> {
                                   child: Container(
                                     padding: EdgeInsets.all(AppSpacing.xs),
                                     decoration: BoxDecoration(
-                                      color: colorScheme.error.withOpacity(0.9),
+                                      color: colorScheme.error.withValues(
+                                        alpha: 0.9,
+                                      ),
                                       shape: BoxShape.circle,
                                     ),
                                     child: Icon(

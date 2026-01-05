@@ -29,7 +29,7 @@ class ActivityMarkerWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               boxShadow: AppShadows.soft,
               border: Border.all(
-                color: colorScheme.primary.withOpacity(0.2),
+                color: colorScheme.primary.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
