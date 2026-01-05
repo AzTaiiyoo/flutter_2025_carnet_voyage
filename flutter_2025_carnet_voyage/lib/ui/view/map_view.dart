@@ -10,7 +10,7 @@ import 'package:flutter_2025_carnet_voyage/ui/widget/address_info_widget.dart';
 
 class MapView extends StatefulWidget {
   final VoidCallback? onNavigateToAddActivity;
-  
+
   const MapView({super.key, this.onNavigateToAddActivity});
 
   @override
@@ -19,20 +19,30 @@ class MapView extends StatefulWidget {
 
 class _MapViewState extends State<MapView> {
   final MapController _mapController = MapController();
+  LatLng? _previousPosition;
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<MapCubit, MapState>(
       listener: (context, state) {
-        // Déplacer la carte vers la nouvelle position
+        // Déplacer la carte vers la nouvelle position seulement si les coordonnées ont changé
         if (state.hasSelectedAddress && state.selectedAddress!.hasCoordinates) {
-          _mapController.move(
-            LatLng(
-              state.selectedAddress!.latitude!,
-              state.selectedAddress!.longitude!,
-            ),
-            15.0, // Zoom plus proche lors d'une sélection
+          final LatLng newPosition = LatLng(
+            state.selectedAddress!.latitude!,
+            state.selectedAddress!.longitude!,
           );
+
+          // Comparer les coordonnées directement
+          if (_previousPosition == null ||
+              _previousPosition!.latitude != newPosition.latitude ||
+              _previousPosition!.longitude != newPosition.longitude) {
+            _mapController.move(newPosition, 15.0);
+            _previousPosition = newPosition;
+          }
+        }
+        // Réinitialiser si la sélection est effacée
+        if (!state.hasSelectedAddress) {
+          _previousPosition = null;
         }
       },
       builder: (context, state) {
@@ -134,7 +144,8 @@ class _MapViewState extends State<MapView> {
   }
 
   void _onValidateSelection(BuildContext context, MapState state) {
-    if (state.selectedAddress != null && widget.onNavigateToAddActivity != null) {
+    if (state.selectedAddress != null &&
+        widget.onNavigateToAddActivity != null) {
       // Naviguer vers AddActivity via callback
       widget.onNavigateToAddActivity!();
     }
